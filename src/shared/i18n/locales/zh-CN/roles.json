@@ -1,0 +1,9 @@
+{
+  "page": {
+    "title": "角色与权限",
+    "description": "与后端一致的角色、模块与声明。开发中。",
+    "devHintBefore": "在后端保存角色后，请调用",
+    "devHintAfter": "以使仪表盘与网格缓存失效。",
+    "simButton": "模拟权限变更（失效缓存）"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "app": {
+    "admin": "管理"
+  },
+  "nav": {
+    "sectionMain": "主要",
+    "sectionGov": "治理",
+    "sectionOps": "运营（未来）",
+    "dashboard": "仪表盘",
+    "users": "用户",
+    "roles": "角色与权限",
+    "audit": "审计",
+    "products": "商品",
+    "orders": "订单",
+    "inventory": "库存",
+    "billing": "账单"
+  },
+  "breadcrumb": {
+    "admin": "管理",
+    "dashboard": "仪表盘",
+    "users": "用户",
+    "roles": "角色与权限",
+    "audit": "审计",
+    "products": "商品",
+    "orders": "订单",
+    "inventory": "库存",
+    "billing": "账单"
+  },
+  "shell": {
+    "menuFab": "菜单",
+    "expandSidebar": "展开侧边栏",
+    "collapseSidebar": "收起侧边栏",
+    "closeMenu": "关闭菜单",
+    "mainNavAria": "主导航",
+    "openMenuFab": "打开导航菜单",
+    "backdropClose": "关闭菜单"
+  },
+  "topbar": {
+    "titleDefault": "管理后台",
+    "scope": "范围",
+    "tenantDefault": "默认（实例）",
+    "tenantAria": "管理租户",
+    "notificationsAria": "通知",
+    "notificationsBell": "铃铛",
+    "logout": "退出",
+    "language": "语言",
+    "notifyDemoTitle": "通知中心",
+    "notifyDemoBody": "客户端状态（Zustand）。可接入 SignalR 或轮询。"
+  },
+  "placeholder": {
+    "defaultDescription": "模块准备中。路由与导航已可用。"
+  },
+  "modules": {
+    "products": {
+      "title": "商品",
+      "desc": "目录与商品管理（市场）。开发中。"
+    },
+    "orders": {
+      "title": "订单",
+      "desc": "订单跟踪与管理。开发中。"
+    },
+    "inventory": {
+      "title": "库存",
+      "desc": "物流与库存控制。开发中。"
+    },
+    "billing": {
+      "title": "账单",
+      "desc": "财务与计费。开发中。"
+    }
+  },
+  "breadcrumbAria": "面包屑导航",
+  "errors": {
+    "unknown": "发生未知错误。",
+    "invalidApiResponse": "API 响应无效。",
+    "httpStatus": "HTTP 错误 {{status}}",
+    "requestTimeout": "请求超时（{{ms}} 毫秒）。",
+    "network": "网络失败，请检查连接。",
+    "rootNotFound": "未找到根节点 #root。"
+  },
+  "realtime": {
+    "placeholderDash": "—",
+    "pedidoCanceladoTitle": "订单已取消",
+    "pedidoCanceladoBody": "订单 {{id}}",
+    "pedidoCanceladoBodyWithReason": "订单 {{id}}：{{reason}}",
+    "pagamentoDevolvidoTitle": "付款已退回",
+    "pagamentoValue": "金额：{{valor}}",
+    "pagamentoOrderRef": "订单：{{pedidoId}}",
+    "inlineSeparator": " · ",
+    "pagamentoBodyFallback": "付款 {{id}}",
+    "estoqueBloqueadoTitle": "库存已锁定",
+    "estoqueBodyWithReason": "{{sku}}：{{reason}}",
+    "estoqueItemFallback": "项目",
+    "novoTicketTitle": "新的支持工单",
+    "novoTicketBodyWithSubject": "#{{id}} — {{assunto}}",
+    "novoTicketBodyFallback": "工单 {{id}}"
+  }
+}

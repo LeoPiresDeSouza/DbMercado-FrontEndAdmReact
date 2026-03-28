@@ -1,0 +1,16 @@
+{
+  "page": {
+    "title": "Usuários",
+    "description": "Cadastro e gestão de usuários administrativos (integração com Identity/API). Em desenvolvimento.",
+    "gridAria": "Pré-visualização do grid em cache",
+    "gridTitle": "Grid (React Query)",
+    "gridDescIntro": "Chave:",
+    "gridDescOutro": "+ parâmetros. Substitua por chamada real à API.",
+    "prev": "Página anterior",
+    "pageLabel": "Página {{page}}",
+    "next": "Próxima",
+    "loading": "Carregando…",
+    "refreshing": "Atualizando cache…",
+    "status": "Itens: {{items}} · Total: {{total}} · cache: {{time}}"
+  }
+}

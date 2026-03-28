@@ -1,0 +1,88 @@
+.ds-audit-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.ds-audit-timeline::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--ds-color-border);
+  border-radius: var(--ds-radius-full);
+}
+
+.ds-audit-timeline__item {
+  position: relative;
+  padding-left: var(--ds-space-3xl);
+  padding-bottom: var(--ds-space-xl);
+}
+
+.ds-audit-timeline__item:last-child {
+  padding-bottom: 0;
+}
+
+.ds-audit-timeline__marker {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-color-surface);
+  border: 2px solid var(--ds-color-accent);
+  box-shadow: 0 0 0 3px var(--ds-color-bg-app);
+}
+
+.ds-audit-timeline__item--success .ds-audit-timeline__marker {
+  border-color: var(--ds-color-success);
+}
+
+.ds-audit-timeline__item--warning .ds-audit-timeline__marker {
+  border-color: var(--ds-color-warning);
+}
+
+.ds-audit-timeline__item--danger .ds-audit-timeline__marker {
+  border-color: var(--ds-color-danger);
+}
+
+.ds-audit-timeline__card {
+  padding: var(--ds-space-md) var(--ds-space-lg);
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+
+.ds-audit-timeline__time {
+  display: block;
+  font-size: var(--ds-font-size-xs);
+  color: var(--ds-color-text-muted);
+  margin-bottom: var(--ds-space-xs);
+}
+
+.ds-audit-timeline__title {
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  color: var(--ds-color-text-primary);
+  line-height: var(--ds-line-height-tight);
+}
+
+.ds-audit-timeline__desc {
+  margin-top: var(--ds-space-xs);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-secondary);
+  line-height: var(--ds-line-height-normal);
+}
+
+.ds-audit-timeline__empty {
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+  padding: var(--ds-space-lg);
+  border-radius: var(--ds-radius-md);
+  border: 1px dashed var(--ds-color-border);
+  text-align: center;
+}

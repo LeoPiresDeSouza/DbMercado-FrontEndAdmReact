@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "loading": "Loading summary…",
+    "headline": "Administrative summary",
+    "fallbackTitle": "Admin console",
+    "intro": "Data cached with TanStack Query (key includes tenant). Change the scope in the header to trigger invalidation and refetch.",
+    "updated": "Updated: {{val}}",
+    "tenant": "Tenant in query: {{tenant}}",
+    "tenantDefault": "default",
+    "backgroundRefresh": "Refreshing in background…",
+    "cacheAt": "Cache (dataUpdatedAt): {{val}}"
+  }
+}

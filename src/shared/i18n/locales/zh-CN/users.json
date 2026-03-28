@@ -1,0 +1,16 @@
+{
+  "page": {
+    "title": "用户",
+    "description": "管理用户目录（Identity/API 集成）。开发中。",
+    "gridAria": "网格缓存预览",
+    "gridTitle": "网格（React Query）",
+    "gridDescIntro": "键：",
+    "gridDescOutro": "+ 参数。请替换为真实 API 调用。",
+    "prev": "上一页",
+    "pageLabel": "第 {{page}} 页",
+    "next": "下一页",
+    "loading": "加载中…",
+    "refreshing": "刷新缓存中…",
+    "status": "条目：{{items}} · 总计：{{total}} · 缓存：{{time}}"
+  }
+}

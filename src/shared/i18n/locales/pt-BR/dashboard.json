@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "loading": "Carregando resumo…",
+    "headline": "Resumo administrativo",
+    "fallbackTitle": "Painel administrativo",
+    "intro": "Dados em cache via TanStack Query (chave inclui tenant). Troque o escopo no topo para ver invalidação automática e nova busca.",
+    "updated": "Atualizado: {{val}}",
+    "tenant": "Tenant na query: {{tenant}}",
+    "tenantDefault": "padrão",
+    "backgroundRefresh": "Atualizando em segundo plano…",
+    "cacheAt": "Cache (dataUpdatedAt): {{val}}"
+  }
+}

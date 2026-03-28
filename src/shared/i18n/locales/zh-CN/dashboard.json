@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "loading": "正在加载摘要…",
+    "headline": "管理摘要",
+    "fallbackTitle": "管理后台",
+    "intro": "数据通过 TanStack Query 缓存（键包含租户）。在顶部更改范围可触发失效并重新获取。",
+    "updated": "更新于：{{val}}",
+    "tenant": "查询中的租户：{{tenant}}",
+    "tenantDefault": "默认",
+    "backgroundRefresh": "后台刷新中…",
+    "cacheAt": "缓存（dataUpdatedAt）：{{val}}"
+  }
+}

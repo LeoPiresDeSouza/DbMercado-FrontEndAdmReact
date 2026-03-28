@@ -1,0 +1,113 @@
+.ds-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-sm);
+  border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-family-sans);
+  font-weight: var(--ds-font-weight-medium);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.ds-btn:focus-visible {
+  outline: 2px solid var(--ds-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.ds-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ds-btn--sm {
+  min-height: 32px;
+  padding: 0 var(--ds-space-md);
+  font-size: var(--ds-font-size-sm);
+}
+
+.ds-btn--md {
+  min-height: 40px;
+  padding: 0 var(--ds-space-lg);
+  font-size: var(--ds-font-size-sm);
+}
+
+.ds-btn--lg {
+  min-height: 48px;
+  padding: 0 var(--ds-space-xl);
+  font-size: var(--ds-font-size-md);
+}
+
+.ds-btn--full {
+  width: 100%;
+}
+
+.ds-btn--primary {
+  background: var(--ds-color-accent);
+  color: var(--ds-color-text-primary);
+  border-color: var(--ds-color-accent);
+}
+
+.ds-btn--primary:hover:not(:disabled) {
+  background: var(--ds-color-accent-hover);
+  border-color: var(--ds-color-accent-hover);
+}
+
+.ds-btn--secondary {
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-primary);
+  border-color: var(--ds-color-border);
+}
+
+.ds-btn--secondary:hover:not(:disabled) {
+  background: var(--ds-color-border-subtle);
+}
+
+.ds-btn--ghost {
+  background: transparent;
+  color: var(--ds-color-text-secondary);
+  border-color: transparent;
+}
+
+.ds-btn--ghost:hover:not(:disabled) {
+  color: var(--ds-color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ds-btn--danger {
+  background: var(--ds-color-danger);
+  color: #fff;
+  border-color: var(--ds-color-danger);
+}
+
+.ds-btn--danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.ds-btn__text {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ds-btn--loading .ds-btn__text {
+  opacity: 0.35;
+}
+
+.ds-btn__spinner {
+  position: absolute;
+  width: 1.1em;
+  height: 1.1em;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: var(--ds-radius-full);
+  animation: ds-spin 0.7s linear infinite;
+}
+
+@keyframes ds-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

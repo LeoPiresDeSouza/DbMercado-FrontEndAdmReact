@@ -1,0 +1,15 @@
+.placeholder-page {
+  max-width: 640px;
+}
+
+.placeholder-page__title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-text-primary);
+}
+
+.placeholder-page__desc {
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}

@@ -1,0 +1,35 @@
+.dashboard-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  max-width: 720px;
+}
+
+.dashboard-card__title {
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.dashboard-card__meta-list {
+  margin: 16px 0 0;
+  padding-left: 1.1rem;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.dashboard-card__meta {
+  margin: 4px 0;
+}
+
+.dashboard-card__meta--error {
+  color: var(--color-danger);
+  margin-top: 12px;
+}
+
+.dashboard-card__text {
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}

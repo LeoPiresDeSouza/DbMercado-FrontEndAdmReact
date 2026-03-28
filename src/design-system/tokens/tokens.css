@@ -1,0 +1,108 @@
+/**
+ * Variáveis CSS espelhando `tokens/*.ts` (web).
+ * Manter valores alinhados aos exports TypeScript para extração RN + web consistentes.
+ */
+:root {
+  /* —— Cores —— */
+  --ds-color-bg-app: #0f1419;
+  --ds-color-surface: #141b2d;
+  --ds-color-surface-elevated: rgba(20, 27, 45, 0.95);
+  --ds-color-border: #2d3748;
+  --ds-color-border-subtle: #1e293b;
+  --ds-color-text-primary: #ffffff;
+  --ds-color-text-secondary: #adb5bd;
+  --ds-color-text-muted: #718096;
+  --ds-color-accent: #0d6efd;
+  --ds-color-accent-hover: #0b5ed7;
+  --ds-color-accent-muted: rgba(13, 110, 253, 0.18);
+  --ds-color-danger: #dc3545;
+  --ds-color-success: #198754;
+  --ds-color-warning: #ffc107;
+  --ds-color-focus-ring: rgba(13, 110, 253, 0.45);
+
+  /* Aliases legado (shell admin existente) */
+  --color-bg-app: var(--ds-color-bg-app);
+  --color-surface: var(--ds-color-surface);
+  --color-surface-elevated: var(--ds-color-surface-elevated);
+  --color-border: var(--ds-color-border);
+  --color-text-primary: var(--ds-color-text-primary);
+  --color-text-secondary: var(--ds-color-text-secondary);
+  --color-text-muted: var(--ds-color-text-muted);
+  --color-accent: var(--ds-color-accent);
+  --color-accent-hover: var(--ds-color-accent-hover);
+  --color-danger: var(--ds-color-danger);
+  --color-success: var(--ds-color-success);
+
+  /* —— Espaçamento (px) —— */
+  --ds-space-none: 0;
+  --ds-space-xxs: 2px;
+  --ds-space-xs: 4px;
+  --ds-space-sm: 8px;
+  --ds-space-md: 12px;
+  --ds-space-lg: 16px;
+  --ds-space-xl: 24px;
+  --ds-space-2xl: 32px;
+  --ds-space-3xl: 48px;
+  --ds-space-4xl: 64px;
+
+  /* —— Tipografia —— */
+  --ds-font-family-sans: Poppins, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ds-font-family-mono: ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace;
+  --ds-font-size-2xs: 10px;
+  --ds-font-size-xs: 12px;
+  --ds-font-size-sm: 14px;
+  --ds-font-size-md: 16px;
+  --ds-font-size-lg: 18px;
+  --ds-font-size-xl: 20px;
+  --ds-font-size-2xl: 24px;
+  --ds-font-size-3xl: 30px;
+  --ds-line-height-tight: 1.2;
+  --ds-line-height-normal: 1.45;
+  --ds-line-height-relaxed: 1.6;
+  --ds-font-weight-regular: 400;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-semibold: 600;
+  --ds-font-weight-bold: 700;
+
+  --font-sans: var(--ds-font-family-sans);
+
+  /* —— Raio —— */
+  --ds-radius-none: 0;
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 8px;
+  --ds-radius-lg: 12px;
+  --ds-radius-xl: 16px;
+  --ds-radius-2xl: 24px;
+  --ds-radius-full: 9999px;
+
+  --radius-md: var(--ds-radius-md);
+  --radius-lg: var(--ds-radius-xl);
+
+  /* —— Elevação —— */
+  --ds-elevation-none: none;
+  --ds-elevation-xs: 0 1px 2px rgba(0, 0, 0, 0.22);
+  --ds-elevation-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
+  --ds-elevation-md: 0 4px 16px rgba(0, 0, 0, 0.32);
+  --ds-elevation-lg: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --ds-elevation-xl: 0 18px 48px rgba(0, 0, 0, 0.45);
+
+  --shadow-panel: var(--ds-elevation-lg);
+
+  /* —— Breakpoints (referência; media queries usam valores literais alinhados a breakpoints.ts) —— */
+  --ds-bp-sm: 640px;
+  --ds-bp-md: 768px;
+  --ds-bp-lg: 1024px;
+  --ds-bp-xl: 1280px;
+  --ds-bp-2xl: 1536px;
+
+  /* —— Layout shell (legado) —— */
+  --sidebar-width: 260px;
+  --topbar-height: 56px;
+
+  /* —— Z-index escala —— */
+  --ds-z-dropdown: 1000;
+  --ds-z-sticky: 1020;
+  --ds-z-modal-backdrop: 1040;
+  --ds-z-modal: 1050;
+  --ds-z-toast: 1080;
+}

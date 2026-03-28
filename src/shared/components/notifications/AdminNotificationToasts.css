@@ -1,0 +1,15 @@
+.admin-notification-toasts {
+  position: fixed;
+  right: var(--ds-space-lg);
+  bottom: var(--ds-space-lg);
+  z-index: var(--ds-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-md);
+  max-width: min(400px, calc(100vw - var(--ds-space-xl)));
+  pointer-events: none;
+}
+
+.admin-notification-toasts__toast {
+  pointer-events: auto;
+}

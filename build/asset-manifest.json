@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "/static/css/main.c06217b1.css",
+    "main.js": "/static/js/main.884856c0.js",
+    "i18n-pt-BR-audit-json.js": "/static/js/i18n-pt-BR-audit-json.8f2e39e7.chunk.js",
+    "i18n-pt-BR-auth-json.js": "/static/js/i18n-pt-BR-auth-json.53009fc5.chunk.js",
+    "i18n-pt-BR-common-json.js": "/static/js/i18n-pt-BR-common-json.674b2e04.chunk.js",
+    "i18n-pt-BR-dashboard-json.js": "/static/js/i18n-pt-BR-dashboard-json.e09835f6.chunk.js",
+    "i18n-pt-BR-roles-json.js": "/static/js/i18n-pt-BR-roles-json.70c0d03a.chunk.js",
+    "i18n-pt-BR-users-json.js": "/static/js/i18n-pt-BR-users-json.25e7548d.chunk.js",
+    "i18n-en-US-audit-json.js": "/static/js/i18n-en-US-audit-json.2d6df46b.chunk.js",
+    "i18n-en-US-auth-json.js": "/static/js/i18n-en-US-auth-json.a4f8e79d.chunk.js",
+    "i18n-en-US-common-json.js": "/static/js/i18n-en-US-common-json.95a115ed.chunk.js",
+    "i18n-en-US-dashboard-json.js": "/static/js/i18n-en-US-dashboard-json.02cc040c.chunk.js",
+    "i18n-en-US-roles-json.js": "/static/js/i18n-en-US-roles-json.0f657d4a.chunk.js",
+    "i18n-en-US-users-json.js": "/static/js/i18n-en-US-users-json.be582add.chunk.js",
+    "i18n-zh-CN-audit-json.js": "/static/js/i18n-zh-CN-audit-json.ef559fc6.chunk.js",
+    "i18n-zh-CN-auth-json.js": "/static/js/i18n-zh-CN-auth-json.85e8ce03.chunk.js",
+    "i18n-zh-CN-common-json.js": "/static/js/i18n-zh-CN-common-json.b13970fe.chunk.js",
+    "i18n-zh-CN-dashboard-json.js": "/static/js/i18n-zh-CN-dashboard-json.3068b221.chunk.js",
+    "i18n-zh-CN-roles-json.js": "/static/js/i18n-zh-CN-roles-json.32cf5627.chunk.js",
+    "i18n-zh-CN-users-json.js": "/static/js/i18n-zh-CN-users-json.975b6831.chunk.js",
+    "index.html": "/index.html",
+    "main.c06217b1.css.map": "/static/css/main.c06217b1.css.map",
+    "main.884856c0.js.map": "/static/js/main.884856c0.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c06217b1.css",
+    "static/js/main.884856c0.js"
+  ]
+}

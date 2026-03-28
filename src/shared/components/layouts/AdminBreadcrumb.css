@@ -1,0 +1,34 @@
+.admin-breadcrumb {
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.admin-breadcrumb__list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 0.85rem;
+}
+
+.admin-breadcrumb__link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.admin-breadcrumb__link:hover {
+  color: var(--color-accent);
+}
+
+.admin-breadcrumb__sep {
+  color: var(--color-text-muted);
+  margin: 0 4px;
+  user-select: none;
+}
+
+.admin-breadcrumb__current {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}

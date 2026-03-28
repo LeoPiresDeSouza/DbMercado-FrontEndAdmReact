@@ -1,0 +1,97 @@
+{
+  "app": {
+    "admin": "Admin"
+  },
+  "nav": {
+    "sectionMain": "Principal",
+    "sectionGov": "Governança",
+    "sectionOps": "Operação (futuro)",
+    "dashboard": "Dashboard",
+    "users": "Usuários",
+    "roles": "Perfis e permissões",
+    "audit": "Auditoria",
+    "products": "Produtos",
+    "orders": "Pedidos",
+    "inventory": "Estoque",
+    "billing": "Faturamento"
+  },
+  "breadcrumb": {
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "users": "Usuários",
+    "roles": "Perfis e permissões",
+    "audit": "Auditoria",
+    "products": "Produtos",
+    "orders": "Pedidos",
+    "inventory": "Estoque",
+    "billing": "Faturamento"
+  },
+  "shell": {
+    "menuFab": "Menu",
+    "expandSidebar": "Expandir menu lateral",
+    "collapseSidebar": "Recolher menu lateral",
+    "closeMenu": "Fechar menu",
+    "mainNavAria": "Navegação principal",
+    "openMenuFab": "Abrir menu de navegação",
+    "backdropClose": "Fechar menu"
+  },
+  "topbar": {
+    "titleDefault": "Painel administrativo",
+    "scope": "Escopo",
+    "tenantDefault": "Padrão (instalação)",
+    "tenantAria": "Tenant administrativo",
+    "notificationsAria": "Notificações",
+    "notificationsBell": "Sino",
+    "logout": "Sair",
+    "language": "Idioma",
+    "notifyDemoTitle": "Centro de notificações",
+    "notifyDemoBody": "Estado client-side (Zustand). Integre com SignalR ou polling quando disponível."
+  },
+  "placeholder": {
+    "defaultDescription": "Módulo em preparação. A estrutura de rotas e navegação já está disponível."
+  },
+  "modules": {
+    "products": {
+      "title": "Produtos",
+      "desc": "Catálogo e gestão de produtos (Marketplace). Em desenvolvimento."
+    },
+    "orders": {
+      "title": "Pedidos",
+      "desc": "Acompanhamento e gestão de pedidos. Em desenvolvimento."
+    },
+    "inventory": {
+      "title": "Estoque",
+      "desc": "Logística e controle de estoque. Em desenvolvimento."
+    },
+    "billing": {
+      "title": "Faturamento",
+      "desc": "Financeiro e faturamento. Em desenvolvimento."
+    }
+  },
+  "breadcrumbAria": "Trilha de navegação",
+  "errors": {
+    "unknown": "Ocorreu um erro desconhecido.",
+    "invalidApiResponse": "Resposta inválida da API.",
+    "httpStatus": "Erro HTTP {{status}}",
+    "requestTimeout": "Tempo esgotado ({{ms}} ms).",
+    "network": "Falha de rede. Verifique sua conexão.",
+    "rootNotFound": "Elemento #root não encontrado."
+  },
+  "realtime": {
+    "placeholderDash": "—",
+    "pedidoCanceladoTitle": "Pedido cancelado",
+    "pedidoCanceladoBody": "Pedido {{id}}",
+    "pedidoCanceladoBodyWithReason": "Pedido {{id}}: {{reason}}",
+    "pagamentoDevolvidoTitle": "Pagamento devolvido",
+    "pagamentoValue": "Valor: {{valor}}",
+    "pagamentoOrderRef": "Pedido: {{pedidoId}}",
+    "inlineSeparator": " · ",
+    "pagamentoBodyFallback": "Pagamento {{id}}",
+    "estoqueBloqueadoTitle": "Estoque bloqueado",
+    "estoqueBodyWithReason": "{{sku}}: {{reason}}",
+    "estoqueItemFallback": "item",
+    "novoTicketTitle": "Novo ticket de suporte",
+    "novoTicketBodyWithSubject": "#{{id}} — {{assunto}}",
+    "novoTicketBodyFallback": "Ticket {{id}}"
+  }
+}

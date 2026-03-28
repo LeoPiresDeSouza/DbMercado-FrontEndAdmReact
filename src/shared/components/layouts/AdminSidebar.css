@@ -1,0 +1,192 @@
+.admin-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--shell-sidebar-width, var(--sidebar-width));
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
+  transition: width 0.2s ease, transform 0.2s ease;
+}
+
+.admin-sidebar__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 10px 0;
+  gap: 6px;
+}
+
+.admin-sidebar__icon-btn {
+  width: 36px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.admin-sidebar__icon-btn:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.admin-sidebar--collapsed .admin-sidebar__brand-sub,
+.admin-sidebar--collapsed .admin-sidebar__section-label {
+  display: none;
+}
+
+/* Colapsado: sem trecho de rótulo — só glifo (title no link = tooltip). */
+.admin-sidebar--collapsed .admin-sidebar__link-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.admin-sidebar--collapsed .admin-sidebar__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+  min-height: 40px;
+  position: relative;
+}
+
+.admin-sidebar--collapsed .admin-sidebar__link::before {
+  content: attr(data-sidebar-glyph);
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--color-text-secondary);
+}
+
+.admin-sidebar--collapsed .admin-sidebar__link:hover::before,
+.admin-sidebar--collapsed .admin-sidebar__link--active::before {
+  color: var(--color-text-primary);
+}
+
+.admin-sidebar--collapsed .admin-sidebar__brand {
+  position: relative;
+  padding: 14px 8px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-sidebar--collapsed .admin-sidebar__brand-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.admin-sidebar--collapsed .admin-sidebar__brand-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  width: 100%;
+}
+
+.admin-sidebar--collapsed .admin-sidebar__brand-title::after {
+  content: '◆';
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+@media (min-width: 901px) {
+  .admin-sidebar__icon-btn--mobile {
+    display: none;
+  }
+}
+
+.admin-sidebar__brand {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-sidebar__brand-title {
+  display: block;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--color-text-primary);
+}
+
+.admin-sidebar__brand-sub {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.admin-sidebar__nav {
+  padding: 12px 10px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-sidebar__section-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin: 16px 10px 8px;
+}
+
+.admin-sidebar__section-label:first-of-type {
+  margin-top: 8px;
+}
+
+.admin-sidebar__link {
+  display: block;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-primary);
+}
+
+.admin-sidebar__link--active {
+  background: rgba(13, 110, 253, 0.18);
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    width: min(var(--sidebar-width), 88vw);
+  }
+
+  .admin-sidebar--open {
+    transform: translateX(0);
+  }
+
+  .admin-sidebar__toolbar .admin-sidebar__icon-btn:not(.admin-sidebar__icon-btn--mobile) {
+    display: none;
+  }
+}

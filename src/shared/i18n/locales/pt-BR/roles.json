@@ -1,0 +1,9 @@
+{
+  "page": {
+    "title": "Perfis e permissões",
+    "description": "Gestão de perfis, módulos e claims alinhada ao backend. Em desenvolvimento.",
+    "devHintBefore": "Após salvar perfil no backend, chame",
+    "devHintAfter": "para invalidar dashboards e grids.",
+    "simButton": "Simular mudança de permissões (invalida cache)"
+  }
+}

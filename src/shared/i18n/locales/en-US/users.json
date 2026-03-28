@@ -1,0 +1,16 @@
+{
+  "page": {
+    "title": "Users",
+    "description": "Administrative user directory (Identity/API integration). In development.",
+    "gridAria": "Grid cache preview",
+    "gridTitle": "Grid (React Query)",
+    "gridDescIntro": "Key:",
+    "gridDescOutro": "+ parameters. Replace with a real API call.",
+    "prev": "Previous page",
+    "pageLabel": "Page {{page}}",
+    "next": "Next",
+    "loading": "Loading…",
+    "refreshing": "Refreshing cache…",
+    "status": "Items: {{items}} · Total: {{total}} · cache: {{time}}"
+  }
+}

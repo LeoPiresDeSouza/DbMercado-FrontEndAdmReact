@@ -1,0 +1,48 @@
+.ds-datagrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-lg);
+}
+
+.ds-datagrid__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-md);
+}
+
+.ds-datagrid__title {
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-semibold);
+  color: var(--ds-color-text-primary);
+}
+
+.ds-datagrid__desc {
+  margin-top: var(--ds-space-xs);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+  line-height: var(--ds-line-height-normal);
+  max-width: 56ch;
+}
+
+.ds-datagrid__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-sm);
+  align-items: center;
+}
+
+.ds-datagrid__surface {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  overflow: auto;
+  box-shadow: var(--ds-elevation-xs);
+}
+
+@media (min-width: 768px) {
+  .ds-datagrid__header {
+    flex-wrap: nowrap;
+  }
+}

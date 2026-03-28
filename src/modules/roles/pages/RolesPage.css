@@ -1,0 +1,32 @@
+.roles-page__dev-actions {
+  margin-top: 24px;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+}
+
+.roles-page__dev-hint {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.roles-page__dev-hint code {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.roles-page__dev-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
+  background: rgba(13, 110, 253, 0.12);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.roles-page__dev-btn:hover {
+  background: rgba(13, 110, 253, 0.2);
+}
