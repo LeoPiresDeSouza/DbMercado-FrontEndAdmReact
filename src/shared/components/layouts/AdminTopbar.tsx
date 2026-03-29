@@ -6,6 +6,7 @@ import { queryClient } from '../../query/queryClient';
 import { authService } from '../../../modules/auth/services/authService';
 import { useAuthStore } from '../../stores/authStore';
 import { useNotificationCenterStore } from '../../stores/notificationCenterStore';
+import { useModulosUsuarioStore } from '../../stores/modulosUsuarioStore';
 import { usePermissionStore } from '../../stores/permissionStore';
 import './AdminTopbar.css';
 
@@ -29,6 +30,7 @@ function AdminTopbar({ title }: AdminTopbarProps): React.ReactElement {
     authService.logout();
     useAuthStore.getState().clearSession();
     usePermissionStore.getState().clear();
+    useModulosUsuarioStore.getState().clear();
     useNotificationCenterStore.getState().clear();
     queryClient.clear();
     navigate('/login');

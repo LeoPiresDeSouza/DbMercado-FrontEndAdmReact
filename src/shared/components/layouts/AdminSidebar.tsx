@@ -1,7 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
+import { usuarioTemModuloProduto } from '../../constants/produtoModulo';
 import { useAppShellStore } from '../../stores/appShellStore';
+import { useModulosUsuarioStore } from '../../stores/modulosUsuarioStore';
 import './AdminSidebar.css';
 
 const navClass = ({ isActive }: { isActive: boolean }): string =>
@@ -13,6 +15,8 @@ function AdminSidebar(): React.ReactElement {
   const mobileOpen = useAppShellStore((s) => s.mobileSidebarOpen);
   const toggleCollapsed = useAppShellStore((s) => s.toggleSidebarCollapsed);
   const setMobileOpen = useAppShellStore((s) => s.setMobileSidebarOpen);
+  const modulosUsuario = useModulosUsuarioStore((s) => s.modulos);
+  const exibirMenuProdutos = modulosUsuario !== null && usuarioTemModuloProduto(modulosUsuario);
 
   return (
     <aside
@@ -89,15 +93,17 @@ function AdminSidebar(): React.ReactElement {
         </NavLink>
 
         <div className="admin-sidebar__section-label">{t('nav.sectionOps')}</div>
-        <NavLink
-          to="/admin/products"
-          className={navClass}
-          title={t('nav.products')}
-          data-sidebar-glyph="▪"
-          onClick={() => setMobileOpen(false)}
-        >
-          <span className="admin-sidebar__link-text">{t('nav.products')}</span>
-        </NavLink>
+        {exibirMenuProdutos ? (
+          <NavLink
+            to="/admin/products"
+            className={navClass}
+            title={t('nav.products')}
+            data-sidebar-glyph="▪"
+            onClick={() => setMobileOpen(false)}
+          >
+            <span className="admin-sidebar__link-text">{t('nav.products')}</span>
+          </NavLink>
+        ) : null}
         <NavLink
           to="/admin/orders"
           className={navClass}

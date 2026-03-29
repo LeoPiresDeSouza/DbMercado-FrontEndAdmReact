@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
+import { tryLoadModulosUsuario } from '../../../modules/auth/services/moduloUsuarioService';
+import { authService } from '../../../modules/auth/services/authService';
 import { AdminNotificationToasts } from '../notifications/AdminNotificationToasts';
 import { useAppShellStore } from '../../stores/appShellStore';
+import { useModulosUsuarioStore } from '../../stores/modulosUsuarioStore';
+import { readIdentityFromAccessToken } from '../../utils/jwtPayload';
 import AdminSidebar from './AdminSidebar';
 import AdminTopbar from './AdminTopbar';
 import AdminBreadcrumb from './AdminBreadcrumb';
@@ -17,6 +21,34 @@ function AdminLayout(): React.ReactElement {
   const mobileOpen = useAppShellStore((s) => s.mobileSidebarOpen);
   const toggleMobileSidebar = useAppShellStore((s) => s.toggleMobileSidebar);
   const setMobileOpen = useAppShellStore((s) => s.setMobileSidebarOpen);
+
+  useEffect(() => {
+    const token = authService.getAuthToken();
+    const identity = readIdentityFromAccessToken(token);
+    if (!identity) {
+      useModulosUsuarioStore.getState().markLoadedEmpty();
+      return;
+    }
+    const { modulos, setModulos } = useModulosUsuarioStore.getState();
+    if (modulos !== null) {
+      return;
+    }
+    let cancelled = false;
+    void tryLoadModulosUsuario(identity)
+      .then((list) => {
+        if (!cancelled) {
+          setModulos(list);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          useModulosUsuarioStore.getState().markLoadedEmpty();
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className={`admin-shell${collapsed ? ' admin-shell--sidebar-collapsed' : ''}`}>

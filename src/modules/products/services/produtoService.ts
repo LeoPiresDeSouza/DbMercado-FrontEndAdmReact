@@ -1,0 +1,186 @@
+import { z } from 'zod';
+import { adminDotnetApiClient } from '../../../integrations/dotnet-api/adminDotnetApiClient';
+import { generateCorrelationId } from '../../../shared/services/http/correlationId';
+import { normalizeHttpError } from '../../../shared/services/http/normalizeError';
+import { deepCamelCaseKeys } from '../../../shared/utils/deepCamelCaseKeys';
+import { parseJsonWithSchema } from '../../../shared/utils/parseJson';
+import { readResponseJsonUnknown } from '../../../shared/utils/readJson';
+
+const produtoResumoSchema = z.object({
+  id: z.coerce.number(),
+  nome: z.string(),
+  unidadeMedida: z.string(),
+  marca: z.string().nullable().optional(),
+});
+
+const listaResumoSchema = z.array(produtoResumoSchema);
+
+export type ProdutoResumo = z.infer<typeof produtoResumoSchema>;
+
+const produtoSkuResponseSchema = z.object({
+  id: z.coerce.number(),
+  codigo: z.string(),
+  ativo: z.boolean(),
+});
+
+const produtoDetalheSchema = z.object({
+  id: z.coerce.number(),
+  nome: z.string(),
+  descricao: z.string().optional().default(''),
+  marca: z.string().nullable().optional(),
+  modelo: z.string().nullable().optional(),
+  gtin: z.string().nullable().optional(),
+  unidadeMedida: z.string(),
+  origemGeograficaTipo: z.string(),
+  origemGeograficaPais: z.string().nullable().optional(),
+  dadosFiscais: z.object({
+    ncm: z.string(),
+    cest: z.string().nullable().optional(),
+    origem: z.string(),
+  }),
+  dimensaoProduto: z
+    .object({
+      altura: z.coerce.number(),
+      largura: z.coerce.number(),
+      comprimento: z.coerce.number(),
+    })
+    .nullable()
+    .optional(),
+  dimensaoEmbalagem: z.object({
+    altura: z.coerce.number(),
+    largura: z.coerce.number(),
+    comprimento: z.coerce.number(),
+    peso: z.coerce.number(),
+  }),
+  skus: z.array(produtoSkuResponseSchema),
+  atributos: z.array(z.object({ nome: z.string(), valor: z.string() })).optional().default([]),
+});
+
+export type ProdutoDetalhe = z.infer<typeof produtoDetalheSchema>;
+
+/** Corpo alinhado a `ProdutoCreateDto` / `ProdutoUpdateDto` da API (camelCase). */
+export interface ProdutoUpsertPayload {
+  nome: string;
+  descricao?: string | null;
+  marca?: string | null;
+  modelo?: string | null;
+  gtin?: string | null;
+  unidadeMedida: string;
+  origemGeografica: { tipo: string; paisOrigem?: string | null };
+  dadosFiscais: { ncm: string; cest?: string | null; origem: string };
+  dimensaoProduto?: { altura: number; largura: number; comprimento: number } | null;
+  dimensaoEmbalagem: { altura: number; largura: number; comprimento: number; peso: number };
+  skus: Array<{ codigo: string; ativo: boolean }>;
+  atributos?: Array<{ nome: string; valor: string }> | null;
+}
+
+function mapDetalheToUpsert(p: ProdutoDetalhe): ProdutoUpsertPayload {
+  return {
+    nome: p.nome,
+    descricao: p.descricao,
+    marca: p.marca ?? null,
+    modelo: p.modelo ?? null,
+    gtin: p.gtin ?? null,
+    unidadeMedida: p.unidadeMedida,
+    origemGeografica: {
+      tipo: p.origemGeograficaTipo,
+      paisOrigem: p.origemGeograficaPais ?? null,
+    },
+    dadosFiscais: {
+      ncm: p.dadosFiscais.ncm,
+      cest: p.dadosFiscais.cest ?? null,
+      origem: p.dadosFiscais.origem,
+    },
+    dimensaoProduto: p.dimensaoProduto ?? null,
+    dimensaoEmbalagem: p.dimensaoEmbalagem,
+    skus: p.skus.map((s) => ({ codigo: s.codigo, ativo: s.ativo })),
+    atributos: p.atributos && p.atributos.length > 0 ? p.atributos : null,
+  };
+}
+
+export async function listarProdutosResumo(): Promise<ProdutoResumo[]> {
+  const correlationId = generateCorrelationId();
+  const response = await adminDotnetApiClient.request('/api/produtos', { method: 'GET', correlationId });
+  const raw = await readResponseJsonUnknown(response);
+  if (!response.ok) {
+    throw normalizeHttpError(response, 'dotnet', correlationId, raw);
+  }
+  return parseJsonWithSchema(listaResumoSchema, deepCamelCaseKeys(raw));
+}
+
+export async function obterProdutoPorId(id: number): Promise<ProdutoDetalhe> {
+  const correlationId = generateCorrelationId();
+  const response = await adminDotnetApiClient.request(`/api/produtos/${id}`, { method: 'GET', correlationId });
+  const raw = await readResponseJsonUnknown(response);
+  if (!response.ok) {
+    throw normalizeHttpError(response, 'dotnet', correlationId, raw);
+  }
+  return parseJsonWithSchema(produtoDetalheSchema, deepCamelCaseKeys(raw));
+}
+
+export async function criarProduto(body: ProdutoUpsertPayload): Promise<number> {
+  const response = await adminDotnetApiClient.request('/api/produtos', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  const raw = await readResponseJsonUnknown(response);
+  if (!response.ok) {
+    throw new Error(
+      typeof raw === 'object' && raw && 'message' in raw ? String((raw as { message?: string }).message) : `HTTP ${response.status}`
+    );
+  }
+  if (typeof raw === 'number') {
+    return raw;
+  }
+  if (raw !== null && typeof raw === 'object' && 'id' in raw && typeof (raw as { id: unknown }).id === 'number') {
+    return (raw as { id: number }).id;
+  }
+  const n = Number(raw);
+  if (!Number.isNaN(n)) {
+    return n;
+  }
+  throw new Error('Resposta inesperada ao criar produto.');
+}
+
+export async function atualizarProduto(id: number, body: ProdutoUpsertPayload): Promise<void> {
+  const response = await adminDotnetApiClient.request(`/api/produtos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const raw = await readResponseJsonUnknown(response);
+    throw new Error(
+      typeof raw === 'object' && raw && 'message' in raw ? String((raw as { message?: string }).message) : `HTTP ${response.status}`
+    );
+  }
+}
+
+export async function excluirProduto(id: number): Promise<void> {
+  const response = await adminDotnetApiClient.request(`/api/produtos/${id}`, { method: 'DELETE' });
+  if (!response.ok) {
+    const raw = await readResponseJsonUnknown(response);
+    throw new Error(
+      typeof raw === 'object' && raw && 'message' in raw ? String((raw as { message?: string }).message) : `HTTP ${response.status}`
+    );
+  }
+}
+
+export type CampoBasicoEditavel = 'nome' | 'marca' | 'unidadeMedida';
+
+export async function atualizarCamposBasicosProduto(
+  id: number,
+  campo: CampoBasicoEditavel,
+  valorNovo: unknown
+): Promise<void> {
+  const detalhe = await obterProdutoPorId(id);
+  const payload = mapDetalheToUpsert(detalhe);
+  if (campo === 'nome') {
+    payload.nome = String(valorNovo ?? '');
+  } else if (campo === 'marca') {
+    const s = valorNovo === null || valorNovo === undefined ? '' : String(valorNovo);
+    payload.marca = s.trim() === '' ? null : s;
+  } else {
+    payload.unidadeMedida = String(valorNovo ?? '');
+  }
+  await atualizarProduto(id, payload);
+}

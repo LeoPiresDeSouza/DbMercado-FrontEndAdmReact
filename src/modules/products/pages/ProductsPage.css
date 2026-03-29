@@ -1,0 +1,137 @@
+.products-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.products-page--state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.products-page__state-msg {
+  color: var(--admin-muted, #5c6470);
+  font-size: 1rem;
+}
+
+.products-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.products-page__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.products-page__subtitle {
+  margin: 0;
+  color: var(--admin-muted, #5c6470);
+  font-size: 0.95rem;
+}
+
+.products-page__section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.products-page__create {
+  margin-bottom: 1.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--admin-border, #e2e6ea);
+  border-radius: 8px;
+  background: var(--admin-surface-elevated, #fafbfc);
+}
+
+.products-page__form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.products-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.products-page__field span {
+  font-weight: 500;
+}
+
+.products-page__field input[type='text'],
+.products-page__field input:not([type='checkbox']) {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--admin-border, #cfd4d9);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.products-page__field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.products-page__actions {
+  margin-top: 1rem;
+}
+
+.products-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.products-page__grid-empty {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #5c6470);
+  background: var(--color-surface-muted, #f0f2f5);
+  border-radius: 6px;
+}
+
+.products-page__btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border, #cfd4d9);
+  background: #fff;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.products-page__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.products-page__btn--primary {
+  background: #1a56db;
+  color: #fff;
+  border-color: #1a56db;
+}
+
+.products-page__btn--danger {
+  background: #c62828;
+  color: #fff;
+  border-color: #c62828;
+}
+
+.products-page__ag-root {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border, #e2e6ea);
+  --ag-font-size: 13px;
+}
+
+.products-page__ag-root .ag-root-wrapper-body {
+  min-height: 480px;
+}
