@@ -51,26 +51,141 @@ button {
    AG Grid — catálogo de produtos (densidade ERP)
    -------------------------------------------------------------------------- */
 .produtos-grid-host.produtos-grid-host--erp {
-  --ag-grid-size: 6px;
+  --ag-grid-size: 7px;
   --ag-font-size: 13px;
-  --ag-line-height: 1.4;
-  --ag-cell-horizontal-padding: 12px;
+  --ag-line-height: 1.45;
+  --ag-cell-horizontal-padding: 14px;
+  /*
+   * Igual a `headerHeight` em ProdutosGrid (GRID_HEADER_PX). Sem isso, o Quartz usa
+   * calc(font + grid-size * 4.25) e o header do painel (ex.: modo pivot) fica desalinhado do header do grid.
+   */
+  --ag-header-height: 44px;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-header-cell {
+  padding-left: 12px;
+  padding-right: 10px;
 }
 
 .produtos-grid-host.produtos-grid-host--erp .ag-header-cell-label,
 .produtos-grid-host.produtos-grid-host--erp .ag-header-cell-text {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #6b7280;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #374151;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-header-cell-menu-button,
+.produtos-grid-host.produtos-grid-host--erp .ag-header-cell-filter-button {
+  opacity: 0.72;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-header-cell-menu-button:hover {
+  opacity: 1;
+}
+
+/*
+ * Painel Colunas: o `.ag-column-panel` é flex column; o default `flex-shrink: 1` deixa o bloco
+ * “Modo pivot” encolher abaixo do header do grid. Travamos altura = header e proibimos shrink.
+ * `!important` + px fixo: mesmo valor que `CATALOG_GRID_HEADER_PX` / `headerHeight` do grid (tema injetado pode vencer só `var(--ag-header-height)`).
+ */
+.produtos-grid-host.produtos-grid-host--erp .ag-pivot-mode-panel {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  align-items: center;
+  box-sizing: border-box;
+  border: none !important;
+  box-shadow:
+    inset 0 1px 0 0 #e2e8f0,
+    inset 0 -1px 0 0 #e2e8f0 !important;
+}
+
+/*
+ * Painel lateral Colunas (checkbox + pesquisa, pivot, largura): ver `createPart` em
+ * `src/modules/products/grid/produtosQuartzTheme.ts` — injetado pelo Theming API junto com o Quartz
+ * (CSS em `global.css` não batia na cascata do grid).
+ */
+
+/*
+ * Faixa das abas verticais (Colunas / Filtros): o Quartz usa ~icon + 2×grid (~30px).
+ * Referência AG Grid premium fica em ~44–48px para ícone + rótulo legível.
+ *
+ * `ag-grid.css` define `padding-top: calc(var(--ag-grid-size) * 4)` em `.ag-side-buttons`
+ * (espaço vazio no topo). O Quartz zera isso só em `.ag-theme-quartz .ag-side-buttons`;
+ * com Theming API o wrapper pode não ter essa classe — sobra um “container” em branco acima de Colunas.
+ */
+.produtos-grid-host.produtos-grid-host--erp .ag-side-buttons {
+  width: 48px;
+  min-width: 48px;
+  flex-shrink: 0;
+  padding: 0;
+  align-self: stretch;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-side-bar {
+  min-width: 48px;
+}
+
+/* Área de toque e espaço para rótulo vertical */
+.produtos-grid-host.produtos-grid-host--erp .ag-side-button-button {
+  padding: 12px 6px;
+  gap: 6px;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-side-bar .ag-column-drop-vertical {
+  min-height: 72px;
+}
+
+/*
+ * Painel Colunas (Enterprise): por defeito `.ag-column-drop-vertical` tem flex:1 e disputa altura com a lista.
+ * “Valores” fica fora do sítio — sem zoom a zona de arraste não aparece. Fixar altura intrínseca das zonas
+ * (grupos + valores) e dar `flex:1` + min-height:0 à lista para ela fazer scroll interno.
+ */
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-drop-vertical {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  min-height: 76px !important;
+}
+
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
 }
 
 .produtos-grid-host.produtos-grid-host--erp .ag-cell:not(.produtos-grid__cell--acoes) {
   font-size: 13px;
   line-height: 1.4;
   color: #111827;
+}
+
+/*
+ * Centralização vertical: o tema posiciona o conteúdo no topo se a célula não for flex.
+ * Aplicamos flex na célula e no wrapper para cobrir variações de DOM (Quartz / Enterprise).
+ */
+.produtos-grid-host.produtos-grid-host--erp .ag-row > .ag-cell:not(.ag-cell-inline-editing) {
+  display: flex;
+  align-items: center;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-cell:not(.ag-cell-inline-editing) .ag-cell-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-paging-panel {
+  min-height: 40px;
+  max-height: 48px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.25;
+  gap: 8px;
 }
 
 .produtos-grid-host .produtos-grid__cell--acoes {
@@ -96,12 +211,26 @@ button {
 }
 
 .produtos-grid-host.produtos-grid-host--erp .ag-root-wrapper {
-  border-radius: 0;
   overflow: hidden;
+}
+
+/*
+ * Catálogo paginado: `domLayout: autoHeight` — evita scroll vertical duplicado (grid + página).
+ */
+.produtos-grid-host.produtos-grid-host--erp.produtos-grid-host--catalog-scroll .ag-body-viewport {
+  overflow-y: hidden !important;
 }
 
 .produtos-grid-host .ag-root-wrapper-body {
   min-width: 0;
+}
+
+/* `domLayout: autoHeight`: garantir que a área central acompanhe a largura do host (evita “vão” antes de Ações). */
+.produtos-grid-host.produtos-grid-host--erp .ag-layout-auto-height .ag-center-cols-viewport {
+  min-width: 100%;
+}
+.produtos-grid-host.produtos-grid-host--erp .ag-layout-auto-height .ag-center-cols-container {
+  width: 100%;
 }
 
 /* Ícones Lucide injetados via gridOptions.icons (HTML estático); substituem máscaras do icon set do tema */
@@ -130,5 +259,33 @@ button {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* --------------------------------------------------------------------------
+   Catálogo (#dbmercado-produtos-grid-host): painel Colunas vs CSS do Enterprise
+   O bundle injeta .ag-column-panel-column-select:nth-child(n+2){ border-top: ... }
+   (linha entre pivot e pesquisa). Precisa !important + seletor forte; carrega por último.
+   -------------------------------------------------------------------------- */
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select.ag-column-panel-column-select {
+  border-top: 0 none transparent !important;
+  border-top-width: 0 !important;
+  border-bottom: none !important;
+  padding-top: calc(var(--ag-grid-size, 7px) * 3) !important;
+}
+
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header {
+  border-bottom: none !important;
+  padding-block: 6px 0 !important;
+  min-height: unset !important;
+  height: auto !important;
+}
+
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-text-field-input,
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-input-field-input {
+  border-top: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
+  border-left: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
+  border-right: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
+  border-bottom: none !important;
+  border-radius: 10px !important;
 }
 

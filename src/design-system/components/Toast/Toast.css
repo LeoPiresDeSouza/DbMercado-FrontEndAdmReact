@@ -48,14 +48,61 @@
   border-color: var(--ds-color-border);
 }
 
+/* Sucesso: como antes — superfície padrão com borda verde */
 .ds-toast--success {
   border-color: rgba(25, 135, 84, 0.45);
 }
 
+/* Aviso: fundo laranja/âmbar */
 .ds-toast--warning {
-  border-color: rgba(255, 193, 7, 0.45);
+  border-color: rgba(245, 158, 11, 0.6);
+  background: linear-gradient(
+    160deg,
+    rgba(217, 119, 6, 0.35) 0%,
+    rgba(180, 83, 9, 0.22) 45%,
+    rgba(20, 27, 45, 0.9) 100%
+  );
 }
 
+.ds-toast--warning .ds-toast__title {
+  color: #fde68a;
+}
+
+.ds-toast--warning .ds-toast__body {
+  color: rgba(253, 230, 138, 0.88);
+}
+
+.ds-toast--warning .ds-toast__dismiss {
+  color: rgba(253, 230, 138, 0.75);
+}
+
+.ds-toast--warning .ds-toast__dismiss:hover {
+  color: #fffbeb;
+}
+
+/* Erro: fundo vermelho */
 .ds-toast--error {
-  border-color: rgba(220, 53, 69, 0.5);
+  border-color: rgba(220, 53, 69, 0.75);
+  background: linear-gradient(
+    155deg,
+    rgba(220, 53, 69, 0.38) 0%,
+    rgba(185, 28, 28, 0.22) 50%,
+    rgba(20, 27, 45, 0.92) 100%
+  );
+}
+
+.ds-toast--error .ds-toast__title {
+  color: #fecaca;
+}
+
+.ds-toast--error .ds-toast__body {
+  color: rgba(254, 202, 202, 0.9);
+}
+
+.ds-toast--error .ds-toast__dismiss {
+  color: rgba(254, 202, 202, 0.75);
+}
+
+.ds-toast--error .ds-toast__dismiss:hover {
+  color: #fff1f2;
 }

@@ -7,20 +7,20 @@ import { useModulosUsuarioStore } from '../../../shared/stores/modulosUsuarioSto
 import { useNotificationCenterStore } from '../../../shared/stores/notificationCenterStore';
 import { resolveLocalizedErrorMessage } from '../../../shared/utils/resolveLocalizedErrorMessage';
 import ProdutosGrid, { type ProdutosGridPageSizeOption } from '../components/ProdutosGrid';
-import { excluirProduto, type ProdutoResumo } from '../services/produtoService';
+import { excluirProduto, type ProdutoGridRow } from '../services/produtoService';
 
 function ProductsListPage(): React.ReactElement {
   const { t } = useTranslation('common');
   const modulos = useModulosUsuarioStore((s) => s.modulos);
   const addNotification = useNotificationCenterStore((s) => s.add);
-  const gridApiRef = useRef<GridApi<ProdutoResumo> | null>(null);
+  const gridApiRef = useRef<GridApi<ProdutoGridRow> | null>(null);
   const [gridPageSize, setGridPageSize] = useState<ProdutosGridPageSizeOption>(20);
 
   const podeVerProdutos = modulos !== null && usuarioTemModuloProduto(modulos);
   const carregandoModulos = modulos === null;
 
   const refreshGrid = useCallback(() => {
-    gridApiRef.current?.refreshInfiniteCache();
+    gridApiRef.current?.refreshServerSide({ purge: true });
   }, []);
 
   const handleDatasourceError = useCallback(
@@ -39,7 +39,7 @@ function ProductsListPage(): React.ReactElement {
     if (!api) {
       return;
     }
-    const selected = api.getSelectedRows() as ProdutoResumo[];
+    const selected = api.getSelectedRows().filter((r): r is ProdutoGridRow & { id: number } => !r.isGroup && r.id != null);
     if (selected.length === 0) {
       addNotification({
         title: t('modules.productsAdmin.deleteNoneTitle'),

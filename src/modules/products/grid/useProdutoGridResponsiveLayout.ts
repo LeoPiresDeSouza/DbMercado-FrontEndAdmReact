@@ -1,9 +1,7 @@
 import type { FirstDataRenderedEvent, GridApi, GridReadyEvent } from 'ag-grid-community';
 import { useCallback, useEffect, useRef } from 'react';
-import type { ProdutoResumo } from '../services/produtoService';
+import type { ProdutoGridRow } from '../services/produtoService';
 
-/** Desktop: ajuste proporcional à largura do grid. */
-const VIEWPORT_LG = 1280;
 /** Tablet: exibe coluna de menor prioridade (marca). */
 const VIEWPORT_MD = 768;
 /** Mobile estreito: oculta unidade; mantém nome + ações + scroll horizontal. */
@@ -12,7 +10,7 @@ const VIEWPORT_SM = 520;
 const COL_MARCA = 'marca';
 const COL_UNIDADE = 'unidadeMedida';
 
-function applyVisibility(api: GridApi<ProdutoResumo>): void {
+function applyVisibility(api: GridApi<ProdutoGridRow>): void {
   const w = window.innerWidth;
   const showMarca = w >= VIEWPORT_MD;
   const showUnidade = w >= VIEWPORT_SM;
@@ -21,20 +19,12 @@ function applyVisibility(api: GridApi<ProdutoResumo>): void {
 }
 
 /**
- * Visibilidade por breakpoint + sizeColumnsToFit só em telas grandes (sem auto-size por conteúdo).
+ * Visibilidade por breakpoint + encaixe de larguras (`gridOptions.autoSizeStrategy` = fitGridWidth).
  */
-export function applyProdutoGridResponsiveLayout(api: GridApi<ProdutoResumo>): void {
+export function applyProdutoGridResponsiveLayout(api: GridApi<ProdutoGridRow>): void {
   applyVisibility(api);
-  if (window.innerWidth >= VIEWPORT_LG) {
-    api.sizeColumnsToFit({
-      defaultMinWidth: 80,
-      columnLimits: [
-        { key: 'nome', minWidth: 240, maxWidth: 520 },
-        { key: COL_MARCA, minWidth: 160, maxWidth: 560 },
-        { key: COL_UNIDADE, minWidth: 96, maxWidth: 140 },
-        { key: 'acoes', minWidth: 84, maxWidth: 104 },
-      ],
-    });
+  if (!api.isDestroyed()) {
+    api.sizeColumnsToFit();
   }
 }
 
@@ -42,10 +32,10 @@ export function applyProdutoGridResponsiveLayout(api: GridApi<ProdutoResumo>): v
  * Reaplica layout em resize (debounce) e após o grid estar pronto / primeira renderização de dados.
  */
 export function useProdutoGridResponsiveLayout(): {
-  onGridReady: (e: GridReadyEvent<ProdutoResumo>) => void;
-  onFirstDataRendered: (e: FirstDataRenderedEvent<ProdutoResumo>) => void;
+  onGridReady: (e: GridReadyEvent<ProdutoGridRow>) => void;
+  onFirstDataRendered: (e: FirstDataRenderedEvent<ProdutoGridRow>) => void;
 } {
-  const apiRef = useRef<GridApi<ProdutoResumo> | null>(null);
+  const apiRef = useRef<GridApi<ProdutoGridRow> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scheduleLayout = useCallback(() => {
@@ -77,14 +67,14 @@ export function useProdutoGridResponsiveLayout(): {
   }, [onResize]);
 
   const onGridReady = useCallback(
-    (e: GridReadyEvent<ProdutoResumo>) => {
+    (e: GridReadyEvent<ProdutoGridRow>) => {
       apiRef.current = e.api;
       applyProdutoGridResponsiveLayout(e.api);
     },
     []
   );
 
-  const onFirstDataRendered = useCallback((e: FirstDataRenderedEvent<ProdutoResumo>) => {
+  const onFirstDataRendered = useCallback((e: FirstDataRenderedEvent<ProdutoGridRow>) => {
     apiRef.current = e.api;
     applyProdutoGridResponsiveLayout(e.api);
   }, []);

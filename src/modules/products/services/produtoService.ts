@@ -15,19 +15,43 @@ const produtoResumoSchema = z.object({
 
 const listaResumoSchema = z.array(produtoResumoSchema);
 
+const produtoGridRowSchema = z.object({
+  isGroup: z.boolean(),
+  groupKey: z.string().optional(),
+  id: z.coerce.number().nullable().optional(),
+  nome: z.string(),
+  unidadeMedida: z.string(),
+  marca: z.string().nullable().optional(),
+  childCount: z.number().optional(),
+});
+
 const produtoGridResultSchema = z.object({
-  rows: z.array(produtoResumoSchema),
+  rows: z.array(produtoGridRowSchema),
   rowCount: z.number(),
 });
 
 export type ProdutoResumo = z.infer<typeof produtoResumoSchema>;
 
-/** Corpo alinhado ao `IGetRowsParams` do AG Grid (infinite row model). */
+export type ProdutoGridRow = z.infer<typeof produtoGridRowSchema>;
+
+/** Metadados SSRM: colunas de grupo / valores (alinhado a `ColumnVO`). */
+export type ProdutoGridColumnVo = {
+  id: string;
+  displayName: string;
+  field?: string | null;
+  aggFunc?: string | null;
+};
+
+/** Corpo alinhado ao pedido de linhas do AG Grid (SSRM + lista plana). */
 export interface ProdutoGridQueryBody {
   startRow: number;
   endRow: number;
   sortModel: Array<{ colId: string; sort?: string | null }>;
   filterModel?: Record<string, unknown> | null;
+  rowGroupCols?: ProdutoGridColumnVo[];
+  groupKeys?: string[];
+  valueCols?: ProdutoGridColumnVo[];
+  pivotMode?: boolean;
 }
 
 const produtoSkuResponseSchema = z.object({
@@ -99,7 +123,7 @@ export async function listarProdutosResumo(): Promise<ProdutoResumo[]> {
 
 export async function consultarProdutosGrid(
   body: ProdutoGridQueryBody
-): Promise<{ rows: ProdutoResumo[]; rowCount: number }> {
+): Promise<{ rows: ProdutoGridRow[]; rowCount: number }> {
   const correlationId = generateCorrelationId();
   const response = await adminDotnetApiClient.request('/api/produtos/consultas/grid', {
     method: 'POST',
@@ -108,6 +132,10 @@ export async function consultarProdutosGrid(
       endRow: body.endRow,
       sortModel: body.sortModel,
       filterModel: body.filterModel ?? null,
+      rowGroupCols: body.rowGroupCols ?? [],
+      groupKeys: body.groupKeys ?? [],
+      valueCols: body.valueCols ?? [],
+      pivotMode: body.pivotMode ?? false,
     }),
     correlationId,
   });

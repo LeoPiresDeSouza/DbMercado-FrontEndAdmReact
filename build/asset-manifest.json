@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.099d9fd8.css",
-    "main.js": "/static/js/main.b131c5ed.js",
+    "main.css": "/static/css/main.20d5e824.css",
+    "main.js": "/static/js/main.b5df47a1.js",
     "i18n-pt-BR-audit-json.js": "/static/js/i18n-pt-BR-audit-json.8f2e39e7.chunk.js",
     "i18n-pt-BR-auth-json.js": "/static/js/i18n-pt-BR-auth-json.53009fc5.chunk.js",
     "i18n-pt-BR-common-json.js": "/static/js/i18n-pt-BR-common-json.92db66c1.chunk.js",
@@ -21,11 +21,11 @@
     "i18n-zh-CN-roles-json.js": "/static/js/i18n-zh-CN-roles-json.32cf5627.chunk.js",
     "i18n-zh-CN-users-json.js": "/static/js/i18n-zh-CN-users-json.975b6831.chunk.js",
     "index.html": "/index.html",
-    "main.099d9fd8.css.map": "/static/css/main.099d9fd8.css.map",
-    "main.b131c5ed.js.map": "/static/js/main.b131c5ed.js.map"
+    "main.20d5e824.css.map": "/static/css/main.20d5e824.css.map",
+    "main.b5df47a1.js.map": "/static/js/main.b5df47a1.js.map"
   },
   "entrypoints": [
-    "static/css/main.099d9fd8.css",
-    "static/js/main.b131c5ed.js"
+    "static/css/main.20d5e824.css",
+    "static/js/main.b5df47a1.js"
   ]
 }

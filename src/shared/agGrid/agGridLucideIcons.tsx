@@ -25,13 +25,14 @@ import {
   ChevronsRight,
   ChevronsUp,
   ChevronsUpDown,
+  ChartNoAxesColumn,
   Circle,
   CircleDot,
   ClipboardPaste,
-  Columns3,
   Copy,
   Download,
   Droplet,
+  Grid2x2,
   Eye,
   EyeOff,
   FileSpreadsheet,
@@ -63,7 +64,6 @@ import {
   Square,
   SquareCheck,
   SquareMinus,
-  TableColumnsSplit,
   Trash2,
   Unlink2,
   Upload,
@@ -79,6 +79,9 @@ const base: LucideProps = {
   absoluteStrokeWidth: true,
   'aria-hidden': true,
 };
+
+/** Abas laterais (Colunas / Filtros): traço mais fino, levemente maior — alinhado a demos “premium” do AG Grid. */
+const sideBarTab: Partial<LucideProps> = { size: 15, strokeWidth: 1.35 };
 
 type IconComponent = React.ComponentType<LucideProps>;
 
@@ -149,9 +152,9 @@ export const agGridLucideIcons: Icons = {
   filterCardCollapse: L(ChevronsUp),
   filterCardEditing: L(Pencil),
   filterTab: L(ListFilter),
-  filtersToolPanel: L(Filter),
-  columns: L(TableColumnsSplit),
-  columnsToolPanel: L(Columns3),
+  filtersToolPanel: L(ChartNoAxesColumn, sideBarTab),
+  columns: L(Grid2x2, sideBarTab),
+  columnsToolPanel: L(Grid2x2, sideBarTab),
   maximize: L(Maximize2),
   minimize: L(Minimize2),
   menuPin: L(Pin),
@@ -207,9 +210,7 @@ export const agGridLucideIcons: Icons = {
   chartsThemeNext: L(ChevronRight),
   chartsDownload: L(Download),
   ensureColumnVisible: L(Eye),
-  checkboxChecked: L(SquareCheck),
-  checkboxIndeterminate: L(SquareMinus),
-  checkboxUnchecked: L(Square),
+  /** Checkboxes/radio: deixar o tema Quartz aplicar máscara + cores (`withParams` no grid), não Lucide. */
   radioButtonOn: L(CircleDot),
   radioButtonOff: L(Circle),
 };

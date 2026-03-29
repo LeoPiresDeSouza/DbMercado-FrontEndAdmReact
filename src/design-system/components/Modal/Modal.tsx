@@ -8,19 +8,25 @@ export type ModalSize = 'sm' | 'md' | 'lg';
 export interface ModalProps {
   open: boolean;
   title?: string;
+  /** Classes extra no `<h2>` do título (ex.: cor de destaque). */
+  titleClassName?: string;
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
   size?: ModalSize;
+  /** Classes extra na área de conteúdo. */
+  bodyClassName?: string;
 }
 
 export function Modal({
   open,
   title,
+  titleClassName,
   onClose,
   children,
   footer,
   size = 'md',
+  bodyClassName,
 }: ModalProps): React.ReactElement | null {
   const titleId = useId();
 
@@ -68,7 +74,7 @@ export function Modal({
       >
         <header className="ds-modal__header">
           {title ? (
-            <h2 className="ds-modal__title" id={titleId}>
+            <h2 className={['ds-modal__title', titleClassName].filter(Boolean).join(' ')} id={titleId}>
               {title}
             </h2>
           ) : null}
@@ -76,7 +82,7 @@ export function Modal({
             ×
           </Button>
         </header>
-        <div className="ds-modal__body">{children}</div>
+        <div className={['ds-modal__body', bodyClassName].filter(Boolean).join(' ')}>{children}</div>
         {footer ? <footer className="ds-modal__footer">{footer}</footer> : null}
       </div>
     </div>,
