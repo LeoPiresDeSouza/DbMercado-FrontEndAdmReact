@@ -15,7 +15,20 @@ const produtoResumoSchema = z.object({
 
 const listaResumoSchema = z.array(produtoResumoSchema);
 
+const produtoGridResultSchema = z.object({
+  rows: z.array(produtoResumoSchema),
+  rowCount: z.number(),
+});
+
 export type ProdutoResumo = z.infer<typeof produtoResumoSchema>;
+
+/** Corpo alinhado ao `IGetRowsParams` do AG Grid (infinite row model). */
+export interface ProdutoGridQueryBody {
+  startRow: number;
+  endRow: number;
+  sortModel: Array<{ colId: string; sort?: string | null }>;
+  filterModel?: Record<string, unknown> | null;
+}
 
 const produtoSkuResponseSchema = z.object({
   id: z.coerce.number(),
@@ -74,30 +87,6 @@ export interface ProdutoUpsertPayload {
   atributos?: Array<{ nome: string; valor: string }> | null;
 }
 
-function mapDetalheToUpsert(p: ProdutoDetalhe): ProdutoUpsertPayload {
-  return {
-    nome: p.nome,
-    descricao: p.descricao,
-    marca: p.marca ?? null,
-    modelo: p.modelo ?? null,
-    gtin: p.gtin ?? null,
-    unidadeMedida: p.unidadeMedida,
-    origemGeografica: {
-      tipo: p.origemGeograficaTipo,
-      paisOrigem: p.origemGeograficaPais ?? null,
-    },
-    dadosFiscais: {
-      ncm: p.dadosFiscais.ncm,
-      cest: p.dadosFiscais.cest ?? null,
-      origem: p.dadosFiscais.origem,
-    },
-    dimensaoProduto: p.dimensaoProduto ?? null,
-    dimensaoEmbalagem: p.dimensaoEmbalagem,
-    skus: p.skus.map((s) => ({ codigo: s.codigo, ativo: s.ativo })),
-    atributos: p.atributos && p.atributos.length > 0 ? p.atributos : null,
-  };
-}
-
 export async function listarProdutosResumo(): Promise<ProdutoResumo[]> {
   const correlationId = generateCorrelationId();
   const response = await adminDotnetApiClient.request('/api/produtos', { method: 'GET', correlationId });
@@ -106,6 +95,27 @@ export async function listarProdutosResumo(): Promise<ProdutoResumo[]> {
     throw normalizeHttpError(response, 'dotnet', correlationId, raw);
   }
   return parseJsonWithSchema(listaResumoSchema, deepCamelCaseKeys(raw));
+}
+
+export async function consultarProdutosGrid(
+  body: ProdutoGridQueryBody
+): Promise<{ rows: ProdutoResumo[]; rowCount: number }> {
+  const correlationId = generateCorrelationId();
+  const response = await adminDotnetApiClient.request('/api/produtos/consultas/grid', {
+    method: 'POST',
+    body: JSON.stringify({
+      startRow: body.startRow,
+      endRow: body.endRow,
+      sortModel: body.sortModel,
+      filterModel: body.filterModel ?? null,
+    }),
+    correlationId,
+  });
+  const raw = await readResponseJsonUnknown(response);
+  if (!response.ok) {
+    throw normalizeHttpError(response, 'dotnet', correlationId, raw);
+  }
+  return parseJsonWithSchema(produtoGridResultSchema, deepCamelCaseKeys(raw));
 }
 
 export async function obterProdutoPorId(id: number): Promise<ProdutoDetalhe> {
@@ -163,24 +173,4 @@ export async function excluirProduto(id: number): Promise<void> {
       typeof raw === 'object' && raw && 'message' in raw ? String((raw as { message?: string }).message) : `HTTP ${response.status}`
     );
   }
-}
-
-export type CampoBasicoEditavel = 'nome' | 'marca' | 'unidadeMedida';
-
-export async function atualizarCamposBasicosProduto(
-  id: number,
-  campo: CampoBasicoEditavel,
-  valorNovo: unknown
-): Promise<void> {
-  const detalhe = await obterProdutoPorId(id);
-  const payload = mapDetalheToUpsert(detalhe);
-  if (campo === 'nome') {
-    payload.nome = String(valorNovo ?? '');
-  } else if (campo === 'marca') {
-    const s = valorNovo === null || valorNovo === undefined ? '' : String(valorNovo);
-    payload.marca = s.trim() === '' ? null : s;
-  } else {
-    payload.unidadeMedida = String(valorNovo ?? '');
-  }
-  await atualizarProduto(id, payload);
 }

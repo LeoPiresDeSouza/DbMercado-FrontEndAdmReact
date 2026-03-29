@@ -7,7 +7,9 @@ import DashboardPage from '../../modules/dashboard/pages/DashboardPage';
 import UsersPage from '../../modules/users/pages/UsersPage';
 import RolesPage from '../../modules/roles/pages/RolesPage';
 import AuditPage from '../../modules/audit/pages/AuditPage';
-import ProductsPage from '../../modules/products/pages/ProductsPage';
+import ProductsListPage from '../../modules/products/pages/ProductsListPage';
+import ProdutoNovoPage from '../../modules/products/pages/ProdutoNovoPage';
+import ProdutoEditarPage from '../../modules/products/pages/ProdutoEditarPage';
 import OrdersPage from '../../modules/orders/pages/OrdersPage';
 import InventoryPage from '../../modules/inventory/pages/InventoryPage';
 import BillingPage from '../../modules/billing/pages/BillingPage';
@@ -41,7 +43,10 @@ export function AppRoutes(): React.ReactElement {
         <Route path="users" element={<UsersPage />} />
         <Route path="roles" element={<RolesPage />} />
         <Route path="audit" element={<AuditPage />} />
-        <Route path="products" element={<ProductsPage />} />
+        <Route path="produtos" element={<ProductsListPage />} />
+        <Route path="produtos/novo" element={<ProdutoNovoPage />} />
+        <Route path="produtos/:id" element={<ProdutoEditarPage />} />
+        <Route path="products" element={<Navigate to="produtos" replace />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="billing" element={<BillingPage />} />

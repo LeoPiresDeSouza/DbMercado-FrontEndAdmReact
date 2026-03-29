@@ -1,4 +1,9 @@
 @import './tokens/tokens.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 *,
 *::before,
@@ -35,4 +40,55 @@ button {
 .i18n-boot {
   min-height: 100vh;
   background: var(--ds-color-bg-app);
+}
+
+/* AG Grid — catálogo de produtos (variáveis no host .produtos-grid-host) */
+.produtos-grid-host {
+  --ag-font-family: Inter, system-ui, sans-serif;
+  --ag-font-size: 13px;
+  --ag-header-background-color: #f9fafb;
+  --ag-header-foreground-color: #374151;
+  --ag-row-hover-color: #f3f4f6;
+  --ag-border-color: #e5e7eb;
+  --ag-secondary-border-color: #e5e7eb;
+  --ag-row-border-color: #e5e7eb;
+  --ag-data-color: #111827;
+  --ag-foreground-color: #111827;
+}
+
+/* Rodapé da paginação (produtos): altura elevada em relação ao padrão; −20% em relação a 108px ≈ 86px */
+.produtos-grid-host .ag-theme-quartz,
+.produtos-grid-host .ag-theme-quartz-dark,
+.produtos-grid-host .ag-theme-quartz-auto-dark {
+  --ag-pagination-panel-height: 86px;
+}
+
+.produtos-grid-host .ag-paging-panel {
+  height: 86px !important;
+  min-height: 86px !important;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.produtos-grid-host .ag-row:not(.ag-row-pinned) {
+  cursor: pointer;
+}
+
+.produtos-grid-host .ag-row.ag-row-hover {
+  background-color: #f9fafb;
+}
+
+.produtos-grid-host .ag-checkbox-input-wrapper {
+  transform: scale(1.2);
+  transform-origin: center;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.produtos-grid-host .ag-checkbox-input-wrapper:focus-within,
+.produtos-grid-host .ag-checkbox-input-wrapper:active {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }

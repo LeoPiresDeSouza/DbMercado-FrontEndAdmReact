@@ -10,7 +10,7 @@ export interface AppShellStoreState {
 }
 
 export const useAppShellStore = create<AppShellStoreState>((set) => ({
-  sidebarCollapsed: false,
+  sidebarCollapsed: true,
   mobileSidebarOpen: false,
 
   toggleSidebarCollapsed: () => {

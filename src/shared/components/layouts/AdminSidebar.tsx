@@ -95,7 +95,7 @@ function AdminSidebar(): React.ReactElement {
         <div className="admin-sidebar__section-label">{t('nav.sectionOps')}</div>
         {exibirMenuProdutos ? (
           <NavLink
-            to="/admin/products"
+            to="/admin/produtos"
             className={navClass}
             title={t('nav.products')}
             data-sidebar-glyph="▪"

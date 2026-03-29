@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { tryLoadModulosUsuario } from '../../../modules/auth/services/moduloUsuarioService';
 import { authService } from '../../../modules/auth/services/authService';
 import { AdminNotificationToasts } from '../notifications/AdminNotificationToasts';
@@ -17,10 +17,16 @@ import './AdminLayout.css';
  */
 function AdminLayout(): React.ReactElement {
   const { t } = useTranslation('common');
+  const location = useLocation();
   const collapsed = useAppShellStore((s) => s.sidebarCollapsed);
   const mobileOpen = useAppShellStore((s) => s.mobileSidebarOpen);
   const toggleMobileSidebar = useAppShellStore((s) => s.toggleMobileSidebar);
   const setMobileOpen = useAppShellStore((s) => s.setMobileSidebarOpen);
+  const setSidebarCollapsed = useAppShellStore((s) => s.setSidebarCollapsed);
+
+  useEffect(() => {
+    setSidebarCollapsed(true);
+  }, [location.pathname, setSidebarCollapsed]);
 
   useEffect(() => {
     const token = authService.getAuthToken();
