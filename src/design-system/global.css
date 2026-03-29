@@ -13,10 +13,15 @@
   box-sizing: border-box;
 }
 
+/* Altura explícita: sem isso, `height: 100%` do AG Grid não resolve e o layout “normal” parece igual ao autoHeight. */
 html,
-body,
+body {
+  height: 100%;
+}
+
 #root {
   min-height: 100%;
+  height: 100%;
 }
 
 body {
@@ -42,31 +47,34 @@ button {
   background: var(--ds-color-bg-app);
 }
 
-/* AG Grid — catálogo de produtos (variáveis no host .produtos-grid-host) */
-.produtos-grid-host {
-  --ag-font-family: Inter, system-ui, sans-serif;
+/* --------------------------------------------------------------------------
+   AG Grid — catálogo de produtos (densidade ERP)
+   -------------------------------------------------------------------------- */
+.produtos-grid-host.produtos-grid-host--erp {
+  --ag-grid-size: 6px;
   --ag-font-size: 13px;
-  --ag-header-background-color: #f9fafb;
-  --ag-header-foreground-color: #374151;
-  --ag-row-hover-color: #f3f4f6;
-  --ag-border-color: #e5e7eb;
-  --ag-secondary-border-color: #e5e7eb;
-  --ag-row-border-color: #e5e7eb;
-  --ag-data-color: #111827;
-  --ag-foreground-color: #111827;
+  --ag-line-height: 1.4;
+  --ag-cell-horizontal-padding: 12px;
 }
 
-/* Rodapé da paginação (produtos): altura elevada em relação ao padrão; −20% em relação a 108px ≈ 86px */
-.produtos-grid-host .ag-theme-quartz,
-.produtos-grid-host .ag-theme-quartz-dark,
-.produtos-grid-host .ag-theme-quartz-auto-dark {
-  --ag-pagination-panel-height: 86px;
+.produtos-grid-host.produtos-grid-host--erp .ag-header-cell-label,
+.produtos-grid-host.produtos-grid-host--erp .ag-header-cell-text {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
 }
 
-.produtos-grid-host .ag-paging-panel {
-  height: 86px !important;
-  min-height: 86px !important;
-  box-sizing: border-box;
+.produtos-grid-host.produtos-grid-host--erp .ag-cell:not(.produtos-grid__cell--acoes) {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #111827;
+}
+
+.produtos-grid-host .produtos-grid__cell--acoes {
+  display: flex;
   align-items: center;
 }
 
@@ -74,21 +82,53 @@ button {
   cursor: pointer;
 }
 
-.produtos-grid-host .ag-row.ag-row-hover {
-  background-color: #f9fafb;
+/* Largura total da coluna principal: cancela o padding horizontal de .admin-content (guia: docs/ag-grid/index.html). */
+.products-page-grid-bleed {
+  margin-left: calc(-1 * var(--admin-content-pad-x, 28px));
+  margin-right: calc(-1 * var(--admin-content-pad-x, 28px));
+  width: calc(100% + 2 * var(--admin-content-pad-x, 28px));
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-.produtos-grid-host .ag-checkbox-input-wrapper {
-  transform: scale(1.2);
-  transform-origin: center;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
+.produtos-grid-host {
+  min-width: 0;
 }
 
-.produtos-grid-host .ag-checkbox-input-wrapper:focus-within,
-.produtos-grid-host .ag-checkbox-input-wrapper:active {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
+.produtos-grid-host.produtos-grid-host--erp .ag-root-wrapper {
+  border-radius: 0;
+  overflow: hidden;
 }
+
+.produtos-grid-host .ag-root-wrapper-body {
+  min-width: 0;
+}
+
+/* Ícones Lucide injetados via gridOptions.icons (HTML estático); substituem máscaras do icon set do tema */
+.ag-lucide-root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--ag-icon-color, currentColor);
+  vertical-align: middle;
+}
+
+.ag-lucide-root svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.ag-lucide-root--spin .ag-lucide-spin-svg {
+  animation: ag-lucide-spin 0.75s linear infinite;
+}
+
+@keyframes ag-lucide-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

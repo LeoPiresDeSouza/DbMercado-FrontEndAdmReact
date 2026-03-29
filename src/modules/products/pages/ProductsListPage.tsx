@@ -86,8 +86,11 @@ function ProductsListPage(): React.ReactElement {
   }
 
   return (
-    <div className="w-full max-w-full px-4 pb-8 pt-2 md:px-6 md:pt-4">
-      <header className="mb-4 border-b border-gray-200 pb-4" aria-label={t('modules.productsAdmin.title')}>
+    <div className="flex w-full flex-col pb-8 pt-2">
+      <header
+        className="mb-4 shrink-0 border-b border-gray-200 pb-4 pt-1"
+        aria-label={t('modules.productsAdmin.title')}
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-lg font-semibold text-gray-900">{t('modules.productsAdmin.toolbarGridTitle')}</h1>
@@ -137,7 +140,10 @@ function ProductsListPage(): React.ReactElement {
         </div>
       </header>
 
-      <section className="w-full" aria-label={t('modules.productsAdmin.gridAria')}>
+      <section
+        className="products-page-grid-bleed flex w-full min-w-0 flex-col overflow-x-auto px-3 pb-2 pt-0 sm:px-4"
+        aria-label={t('modules.productsAdmin.gridAria')}
+      >
         <ProdutosGrid
           gridApiRef={gridApiRef}
           pageSize={gridPageSize}

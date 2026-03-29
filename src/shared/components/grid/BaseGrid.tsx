@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { AllEnterpriseModule } from 'ag-grid-enterprise';
 import {
-  AllCommunityModule,
   type ColDef,
   type GridApi,
   type GridReadyEvent,
@@ -9,6 +9,7 @@ import {
 } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import type { AgGridReactProps } from 'ag-grid-react';
+import { agGridLucideIcons } from '../../agGrid/agGridLucideIcons';
 import {
   BASE_GRID_DEFAULT_COL_DEF,
   BASE_GRID_DEFAULT_ROW_SELECTION,
@@ -16,6 +17,8 @@ import {
 } from './baseGridDefaults';
 
 export type BaseGridProps<TData = unknown> = Omit<AgGridReactProps<TData>, 'modules' | 'theme' | 'onGridReady'> & {
+  /** Tema AG Grid (padrão: Quartz). Sobrescreva para customização via Theming API (`themeQuartz.withParams`). */
+  theme?: AgGridReactProps<TData>['theme'];
   /** Mesclado por cima de {@link BASE_GRID_DEFAULT_COL_DEF}. */
   defaultColDef?: ColDef<TData>;
   /** Se informado, recebe a API quando o grid estiver pronto. */
@@ -30,6 +33,8 @@ export type BaseGridProps<TData = unknown> = Omit<AgGridReactProps<TData>, 'modu
 
 /**
  * Shell do AG Grid com módulos, tema, defaults de coluna, seleção e presets de infinite row model.
+ * Usa {@link AllEnterpriseModule} (Community + Enterprise), alinhado aos exemplos oficiais (`sideBar`, tool panels).
+ * Ícones internos padrão: {@link agGridLucideIcons} (Lucide); passe `icons` para sobrescrever chaves pontuais.
  * Sem regras de negócio: não define colunas, datasource nem chamadas HTTP.
  */
 function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElement {
@@ -38,10 +43,12 @@ function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElem
     onGridReady: userOnGridReady,
     defaultColDef: userDefaultColDef,
     rowSelection: rowSelectionProp,
+    theme: themeProp,
     rowModelType,
     cacheBlockSize,
     maxBlocksInCache,
     maxConcurrentDatasourceRequests,
+    icons: userIcons,
     ...agGridProps
   } = props;
 
@@ -76,10 +83,18 @@ function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElem
         }
       : {};
 
+  const theme = themeProp ?? themeQuartz;
+
+  const mergedIcons = useMemo(
+    () => (userIcons ? { ...agGridLucideIcons, ...userIcons } : agGridLucideIcons),
+    [userIcons]
+  );
+
   return (
     <AgGridReact<TData>
-      modules={[AllCommunityModule]}
-      theme={themeQuartz}
+      modules={[AllEnterpriseModule]}
+      theme={theme}
+      icons={mergedIcons}
       defaultColDef={mergedDefaultColDef}
       rowSelection={rowSelection}
       rowModelType={rowModelType}

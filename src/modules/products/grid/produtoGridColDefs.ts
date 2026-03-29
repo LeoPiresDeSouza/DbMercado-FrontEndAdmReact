@@ -2,58 +2,83 @@ import type { ColDef } from 'ag-grid-community';
 import type { ProdutoResumo } from '../services/produtoService';
 import { ProdutoAcoesCell } from './ProdutoAcoesCell';
 
-export type ProdutoGridColDefOptions = {
-  acoesHeader: string;
+const COL_MARCA = 'marca';
+const COL_UNIDADE = 'unidadeMedida';
+
+export type ProdutoGridColDefLabels = {
+  nome: string;
+  marca: string;
+  unidade: string;
+  acoes: string;
 };
 
 /**
- * Definições de colunas do grid de produtos (filtro/ordenação repassados ao servidor via infinite datasource).
+ * Colunas alinhadas ao catálogo ERP: larguras fixas + uma coluna `flex` (marca).
+ * Dados limitados ao contrato atual da API (`ProdutoResumo`: nome, marca, unidadeMedida).
  */
-export function createProdutoGridColumnDefs(options: ProdutoGridColDefOptions): ColDef<ProdutoResumo>[] {
+export function createProdutoGridColumnDefs(labels: ProdutoGridColDefLabels): ColDef<ProdutoResumo>[] {
+  const dash = (v: unknown) => (v == null || v === '' ? '—' : String(v));
+
   return [
     {
       colId: 'id',
       field: 'id',
       headerName: 'ID',
-      width: 100,
+      width: 88,
       hide: true,
       editable: false,
       filter: 'agNumberColumnFilter',
-      cellClass: 'text-sm text-gray-900 text-right font-medium',
+      type: 'rightAligned',
+      enablePivot: false,
+      enableRowGroup: false,
+      enableValue: false,
+      suppressColumnsToolPanel: true,
+      suppressFiltersToolPanel: true,
     },
     {
+      colId: 'nome',
       field: 'nome',
-      headerName: 'Nome',
-      flex: 1,
-      minWidth: 180,
+      headerName: labels.nome,
+      width: 260,
+      minWidth: 220,
+      maxWidth: 560,
       editable: false,
       filter: 'agTextColumnFilter',
     },
     {
+      colId: COL_MARCA,
       field: 'marca',
-      headerName: 'Marca',
-      width: 160,
+      headerName: labels.marca,
+      flex: 1,
+      minWidth: 200,
       editable: false,
       filter: 'agTextColumnFilter',
-      valueFormatter: (p) => (p.value == null || p.value === '' ? '—' : String(p.value)),
+      valueFormatter: (p) => dash(p.value),
     },
     {
+      colId: COL_UNIDADE,
       field: 'unidadeMedida',
-      headerName: 'Unidade',
-      width: 120,
+      headerName: labels.unidade,
+      width: 110,
+      minWidth: 96,
+      maxWidth: 140,
       editable: false,
       filter: 'agTextColumnFilter',
+      type: 'rightAligned',
+      cellClass: 'produtos-grid__cell--numeric',
     },
     {
       colId: 'acoes',
-      headerName: options.acoesHeader,
-      width: 100,
+      headerName: labels.acoes,
+      width: 90,
+      minWidth: 84,
+      maxWidth: 104,
       pinned: 'right',
       sortable: false,
       filter: false,
       floatingFilter: false,
       suppressMovable: true,
-      cellClass: 'flex items-center',
+      cellClass: 'produtos-grid__cell--acoes',
       cellRenderer: ProdutoAcoesCell,
     },
   ];

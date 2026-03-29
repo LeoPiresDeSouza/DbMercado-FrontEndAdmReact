@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
+import './shared/agGrid/registerAgGridEnterprise';
 import './design-system/global.css';
 import App from './app/App';
 import { i18n, i18nReady } from './shared/i18n';

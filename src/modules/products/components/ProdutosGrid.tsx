@@ -1,9 +1,17 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ColDef, GridApi, IGetRowsParams, PaginationChangedEvent } from 'ag-grid-community';
+import type {
+  GridApi,
+  GridReadyEvent,
+  IGetRowsParams,
+  PaginationChangedEvent,
+  RowSelectionOptions,
+} from 'ag-grid-community';
 import { BaseGrid } from '../../../shared/components/grid';
 import { authService } from '../../auth/services/authService';
 import { createProdutoGridColumnDefs } from '../grid/produtoGridColDefs';
+import { produtosCatalogoQuartzTheme } from '../grid/produtosQuartzTheme';
+import { useProdutoGridResponsiveLayout } from '../grid/useProdutoGridResponsiveLayout';
 import { consultarProdutosGrid, type ProdutoResumo } from '../services/produtoService';
 
 /** Bloco do infinite row model ao exibir “todos” (limite superior da requisição ao servidor). */
@@ -29,11 +37,13 @@ export type ProdutosGridProps = {
 };
 
 /**
- * Grid de catálogo de produtos: colunas + datasource contra `consultarProdutosGrid`.
+ * Catálogo ERP: densidade fixa, scroll horizontal no container, colunas responsivas (visibilidade + fit em desktop).
+ * Dados: apenas campos de `ProdutoResumo` da API (nome, marca, unidadeMedida).
  */
 function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
   const { gridApiRef, onDatasourceError, className, pageSize, onPageSizeChange } = props;
   const { t } = useTranslation('common');
+  const { onGridReady: onResponsiveGridReady, onFirstDataRendered } = useProdutoGridResponsiveLayout();
 
   const onDatasourceErrorRef = useRef(onDatasourceError);
   onDatasourceErrorRef.current = onDatasourceError;
@@ -65,23 +75,22 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
   const datasource = useMemo(() => ({ getRows }), [getRows]);
 
   const columnDefs = useMemo(
-    () => createProdutoGridColumnDefs({ acoesHeader: t('modules.productsAdmin.columnAcoes') }),
+    () =>
+      createProdutoGridColumnDefs({
+        nome: t('modules.productsAdmin.fieldNome'),
+        marca: t('modules.productsAdmin.fieldMarca'),
+        unidade: t('modules.productsAdmin.fieldUnidade'),
+        acoes: t('modules.productsAdmin.columnAcoes'),
+      }),
     [t]
   );
 
-  const defaultColDef = useMemo<ColDef<ProdutoResumo>>(
+  const rowSelection = useMemo<RowSelectionOptions<ProdutoResumo>>(
     () => ({
-      headerClass: 'text-xs font-semibold uppercase tracking-wide text-gray-500',
-      cellClass: 'text-sm text-gray-900',
-    }),
-    []
-  );
-
-  const selectionColumnDef = useMemo(
-    () => ({
-      width: 50,
-      headerClass: 'text-xs font-semibold uppercase tracking-wide text-gray-500',
-      suppressHeaderMenuButton: true,
+      mode: 'multiRow',
+      checkboxes: false,
+      headerCheckbox: false,
+      enableClickSelection: true,
     }),
     []
   );
@@ -123,29 +132,43 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
     [onPageSizeChange]
   );
 
-  const showAgPageSizeSelector = pageSize !== 'all';
+  const handleGridReady = useCallback(
+    (event: GridReadyEvent<ProdutoResumo>) => {
+      onResponsiveGridReady(event);
+    },
+    [onResponsiveGridReady]
+  );
 
   return (
-    <div className={`produtos-grid-host w-full ${className ?? ''}`}>
+    <div
+      className={`produtos-grid-host produtos-grid-host--erp min-h-[400px] min-w-[920px] h-[min(72vh,820px)] ${className ?? ''}`}
+    >
       <BaseGrid<ProdutoResumo>
         key={`produtos-grid-${pageSize}`}
+        className="h-full w-full min-w-0"
+        theme={produtosCatalogoQuartzTheme}
+        loadThemeGoogleFonts
+        sideBar
         gridApiRef={gridApiRef}
         columnDefs={columnDefs}
-        defaultColDef={defaultColDef}
-        selectionColumnDef={selectionColumnDef}
+        rowSelection={rowSelection}
         rowModelType="infinite"
         datasource={datasource}
         getRowId={(p) => String(p.data?.id ?? '')}
-        rowHeight={44}
-        headerHeight={40}
-        domLayout="autoHeight"
+        domLayout="normal"
+        rowHeight={42}
+        headerHeight={38}
+        floatingFiltersHeight={34}
         pagination
         paginationPageSize={blockSize}
-        paginationPageSizeSelector={showAgPageSizeSelector ? PAGE_SIZE_SELECTOR_VALUES : false}
+        paginationPageSizeSelector={false}
         cacheBlockSize={blockSize}
         maxBlocksInCache={maxBlocksInCache}
         localeText={paginationLocale}
+        onGridReady={handleGridReady}
+        onFirstDataRendered={onFirstDataRendered}
         onPaginationChanged={handlePaginationChanged}
+        enableCellTextSelection
       />
     </div>
   );
