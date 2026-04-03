@@ -1,23 +1,52 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Key, Maximize2, Package, Plus, Ruler, Tag } from 'lucide-react';
 import type { ProdutoFormValues } from '../types/produtoFormValues';
 
 const inputBase =
-  'w-full rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0';
-const inputNormal = `${inputBase} border-neutral-300 focus:border-sky-600 focus:ring-sky-500/25`;
-const inputError = `${inputBase} border-red-500 focus:border-red-600 focus:ring-red-500/25`;
+  'h-10 w-full rounded-md border px-3 py-2 text-sm text-white shadow-sm transition-colors placeholder:text-[#718096] focus:outline-none focus:ring-2 focus:ring-offset-0';
+const inputNormal = `${inputBase} border-[#2D3748] bg-[#141B2D] focus:border-[#0D6EFD] focus:ring-[rgba(13,110,253,0.45)]`;
+const inputError = `${inputBase} border-[#DC3545] bg-[#141B2D] focus:border-[#DC3545] focus:ring-[rgba(220,53,69,0.3)]`;
 
 /** Label acima do campo: mesma tipografia e espaçamento em todo o formulário. */
-const labelClass = 'mb-1.5 block text-sm font-medium leading-snug text-neutral-700';
+const labelClass = 'mb-1.5 block text-sm font-medium leading-snug text-[#ADB5BD]';
 
 /** Coluna de campo: evita overflow e mantém label + controle alinhados. */
 const fieldCol = 'flex min-w-0 flex-col';
 
 const sectionFieldset =
-  'min-w-0 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm ring-1 ring-neutral-100 md:p-6';
+  'min-w-0 rounded-xl border border-[#2D3748] bg-[#141B2D] p-6 shadow-sm md:p-8';
 
-const sectionLegend =
-  'mb-5 block w-full border-b border-neutral-200 pb-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500';
+/**
+ * O `<legend>` visível fica colado à borda do `<fieldset>` na maioria dos browsers (ignora padding-top).
+ * Mantemos um legend só para acessibilidade e o título real é um bloco dentro do padding do fieldset.
+ */
+/** Teste visual: título + ícone em laranja (fundo escuro). */
+const sectionHeadingClass =
+  'flex w-full items-center gap-2 border-b border-orange-500/25 pb-4 text-xs font-semibold uppercase tracking-widest text-orange-400';
+
+/** Espaço entre o título da secção e o primeiro campo. */
+const sectionBodyStack = 'mt-8 flex flex-col gap-6';
+
+const subgroupTitleClass = 'mb-5 text-xs font-medium uppercase tracking-wide text-[#718096]';
+
+function SectionLegend({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>;
+  children: React.ReactNode;
+}): React.ReactElement {
+  return (
+    <>
+      <legend className="sr-only">{children}</legend>
+      <div className={sectionHeadingClass} aria-hidden="true">
+        <Icon size={16} className="shrink-0" />
+        <span>{children}</span>
+      </div>
+    </>
+  );
+}
 
 export type ProdutoFormProps = {
   values: ProdutoFormValues;
@@ -30,7 +59,12 @@ function FieldError({ message }: { message?: string }): React.ReactElement | nul
   if (!message) {
     return null;
   }
-  return <p className="mt-1.5 min-h-[1.25rem] text-sm leading-tight text-red-600">{message}</p>;
+  return <p className="mt-1.5 min-h-[1.1rem] text-xs text-[#DC3545]">{message}</p>;
+}
+
+/** `fieldset:disabled` reduz opacidade no browser; mantém legível no DS escuro. */
+function cnFieldset(base: string): string {
+  return `${base} disabled:opacity-60`;
 }
 
 function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
@@ -55,12 +89,12 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Identificação: texto completo + bloco único de atributos comerciais */}
-      <fieldset disabled={disabled} className={sectionFieldset}>
-        <legend className={sectionLegend}>{t('modules.productsAdmin.sectionIdentificacao')}</legend>
+      <fieldset disabled={disabled} className={cnFieldset(sectionFieldset)}>
+        <SectionLegend icon={Package}>{t('modules.productsAdmin.sectionIdentificacao')}</SectionLegend>
 
-        <div className="flex flex-col gap-6">
+        <div className={sectionBodyStack}>
           <div className={fieldCol}>
             <label htmlFor="pf-nome" className={labelClass}>
               {t('modules.productsAdmin.fieldNome')}
@@ -90,10 +124,8 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
             <FieldError message={errors.descricao} />
           </div>
 
-          <div className="border-t border-neutral-100 pt-6">
-            <p className="mb-4 text-xs font-medium uppercase tracking-wide text-neutral-400">
-              {t('modules.productsAdmin.subgroupComercial')}
-            </p>
+          <div className="border-t border-[#1E293B] pt-8">
+            <p className={subgroupTitleClass}>{t('modules.productsAdmin.subgroupComercial')}</p>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               <div className={fieldCol}>
                 <label htmlFor="pf-marca" className={labelClass}>
@@ -157,14 +189,12 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
       </fieldset>
 
       {/* Fiscal: origem geográfica + bloco de códigos fiscais na mesma linha em desktop */}
-      <fieldset disabled={disabled} className={sectionFieldset}>
-        <legend className={sectionLegend}>{t('modules.productsAdmin.sectionFiscalOrigem')}</legend>
+      <fieldset disabled={disabled} className={cnFieldset(sectionFieldset)}>
+        <SectionLegend icon={Tag}>{t('modules.productsAdmin.sectionFiscalOrigem')}</SectionLegend>
 
-        <div className="flex flex-col gap-6">
+        <div className={sectionBodyStack}>
           <div>
-            <p className="mb-4 text-xs font-medium uppercase tracking-wide text-neutral-400">
-              {t('modules.productsAdmin.subgroupOrigemGeografica')}
-            </p>
+            <p className={subgroupTitleClass}>{t('modules.productsAdmin.subgroupOrigemGeografica')}</p>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className={fieldCol}>
                 <label htmlFor="pf-origem" className={labelClass}>
@@ -197,10 +227,8 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
             </div>
           </div>
 
-          <div className="border-t border-neutral-100 pt-6">
-            <p className="mb-4 text-xs font-medium uppercase tracking-wide text-neutral-400">
-              {t('modules.productsAdmin.subgroupFiscal')}
-            </p>
+          <div className="border-t border-[#1E293B] pt-8">
+            <p className={subgroupTitleClass}>{t('modules.productsAdmin.subgroupFiscal')}</p>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div className={fieldCol}>
                 <label htmlFor="pf-ncm" className={labelClass}>
@@ -250,9 +278,9 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
       </fieldset>
 
       {/* Embalagem: quatro medidas sempre na mesma grade em desktop */}
-      <fieldset disabled={disabled} className={sectionFieldset}>
-        <legend className={sectionLegend}>{t('modules.productsAdmin.sectionEmbalagem')}</legend>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <fieldset disabled={disabled} className={cnFieldset(sectionFieldset)}>
+        <SectionLegend icon={Ruler}>{t('modules.productsAdmin.sectionEmbalagem')}</SectionLegend>
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div className={fieldCol}>
             <label htmlFor="pf-ea" className={labelClass}>
               {t('modules.productsAdmin.fieldEmbAltura')}
@@ -275,9 +303,9 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
             <input
               id="pf-el"
               type="text"
-              inputMode="decimal"
-              autoComplete="off"
-              className={p('larguraEmb')}
+                  inputMode="decimal"
+                  autoComplete="off"
+                  className={p('larguraEmb')}
               value={values.larguraEmb}
               onChange={(e) => onChange({ larguraEmb: e.target.value })}
             />
@@ -317,15 +345,17 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
       </fieldset>
 
       {/* Dimensão do produto */}
-      <fieldset disabled={disabled} className={sectionFieldset}>
-        <legend className={sectionLegend}>{t('modules.productsAdmin.sectionDimensaoProduto')}</legend>
+      <fieldset disabled={disabled} className={cnFieldset(sectionFieldset)}>
+        <SectionLegend icon={Maximize2}>{t('modules.productsAdmin.sectionDimensaoProduto')}</SectionLegend>
 
-        <div className="flex flex-col gap-6">
-          <div className={`flex flex-wrap items-center gap-3 rounded-md border border-neutral-100 bg-neutral-50/80 px-4 py-3`}>
+        <div className={sectionBodyStack}>
+          <div
+            className={`flex flex-wrap items-center gap-3 rounded-md border border-[#2D3748] bg-[#0F1419] px-4 py-3`}
+          >
             <input
               id="pf-dim-toggle"
               type="checkbox"
-              className="h-4 w-4 shrink-0 rounded border-neutral-300 text-sky-600 focus:ring-sky-500"
+              className="h-4 w-4 shrink-0 rounded border-[#2D3748] bg-[#141B2D] text-[#0D6EFD] focus:ring-2 focus:ring-[rgba(13,110,253,0.45)] focus:ring-offset-0 focus:ring-offset-transparent"
               checked={values.incluirDimProduto}
               onChange={(e) => onChange({ incluirDimProduto: e.target.checked })}
             />
@@ -387,17 +417,17 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
       </fieldset>
 
       {/* SKUs */}
-      <fieldset disabled={disabled} className={sectionFieldset}>
-        <legend className={sectionLegend}>{t('modules.productsAdmin.sectionSkus')}</legend>
+      <fieldset disabled={disabled} className={cnFieldset(sectionFieldset)}>
+        <SectionLegend icon={Key}>{t('modules.productsAdmin.sectionSkus')}</SectionLegend>
 
-        <div className="flex flex-col gap-6">
+        <div className={sectionBodyStack}>
           <FieldError message={errors.skus} />
 
           <ul className="flex flex-col gap-6">
             {values.skus.map((s, i) => (
               <li
                 key={i}
-                className="rounded-lg border border-neutral-200 bg-neutral-50/60 p-5 ring-1 ring-neutral-100"
+                className="rounded-lg border border-[#2D3748] bg-[#0F1419] p-5 shadow-sm"
               >
                 <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:gap-6">
                   <div className={`min-w-0 flex-1 ${fieldCol}`}>
@@ -417,15 +447,18 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
 
                   <div className="flex shrink-0 flex-col md:w-52">
                     <span className="mb-1.5 min-h-[1.25rem]" aria-hidden />
-                    <div className="flex h-[2.375rem] items-center gap-2.5">
+                    <div className="flex h-10 items-center gap-2.5">
                       <input
                         id={`pf-sku-a-${i}`}
                         type="checkbox"
-                        className="h-4 w-4 shrink-0 rounded border-neutral-300 text-sky-600 focus:ring-sky-500"
+                        className="h-4 w-4 shrink-0 rounded border-[#2D3748] bg-[#141B2D] text-[#0D6EFD] focus:ring-2 focus:ring-[rgba(13,110,253,0.45)] focus:ring-offset-0"
                         checked={s.ativo}
                         onChange={(e) => setSku(i, { ativo: e.target.checked })}
                       />
-                      <label htmlFor={`pf-sku-a-${i}`} className="cursor-pointer text-sm font-medium leading-snug text-neutral-700">
+                      <label
+                        htmlFor={`pf-sku-a-${i}`}
+                        className="cursor-pointer text-sm font-medium leading-snug text-[#ADB5BD]"
+                      >
                         {t('modules.productsAdmin.fieldSkuAtivo')}
                       </label>
                     </div>
@@ -434,10 +467,10 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
 
                   <div className="flex shrink-0 flex-col md:w-auto">
                     <span className="mb-1.5 min-h-[1.25rem]" aria-hidden />
-                    <div className="flex h-[2.375rem] items-center">
+                    <div className="flex h-10 items-center">
                       <button
                         type="button"
-                        className="w-full rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
+                        className="w-full rounded-md border border-[#2D3748] bg-[#141B2D] px-4 py-2 text-sm font-medium text-[#ADB5BD] shadow-sm transition-all hover:border-[#4A5568] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
                         onClick={() => removeSku(i)}
                         disabled={values.skus.length <= 1}
                       >
@@ -453,9 +486,10 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
 
           <button
             type="button"
-            className="w-full rounded-md border border-dashed border-neutral-300 bg-neutral-50/50 px-4 py-3 text-sm font-medium text-neutral-700 hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-900 sm:w-auto sm:self-start"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-[#2D3748] bg-transparent px-4 py-3 text-sm font-medium text-[#ADB5BD] shadow-sm transition-all hover:border-[#0D6EFD] hover:text-white sm:w-auto sm:self-start"
             onClick={addSku}
           >
+            <Plus size={16} aria-hidden />
             {t('modules.productsAdmin.addSku')}
           </button>
         </div>

@@ -1,7 +1,8 @@
 .admin-shell {
   display: flex;
-  min-height: 100%;
-  height: 100%;
+  /* `height: 100%` + `overflow:auto` no main gerava duas barras (área admin + janela). Altura mínima = viewport; o fluxo pode crescer e o scroll fica só na página. */
+  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--color-bg-app);
   --shell-sidebar-width: var(--sidebar-width);
 }
@@ -35,8 +36,7 @@
   min-height: 0;
   --admin-content-pad-x: 28px;
   padding: 24px var(--admin-content-pad-x) 32px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
 @media (max-width: 900px) {

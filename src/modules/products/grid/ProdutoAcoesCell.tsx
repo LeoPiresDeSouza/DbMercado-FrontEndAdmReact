@@ -9,8 +9,8 @@ import { useNotificationCenterStore } from '../../../shared/stores/notificationC
 import { resolveLocalizedErrorMessage } from '../../../shared/utils/resolveLocalizedErrorMessage';
 import { ProdutoDeleteConfirmModal } from './ProdutoDeleteConfirmModal';
 
-const ICON = 16;
-const iconClass = 'h-4 w-4 shrink-0';
+const ICON = 15;
+const iconClass = 'h-[15px] w-[15px] shrink-0';
 
 export function ProdutoAcoesCell(props: CustomCellRendererProps<ProdutoGridRow>): React.ReactElement | null {
   const { t } = useTranslation('common');
@@ -20,8 +20,6 @@ export function ProdutoAcoesCell(props: CustomCellRendererProps<ProdutoGridRow>)
   const deleteBusyRef = useRef(false);
   const row = props.data;
   const id = row?.id ?? null;
-  const productName = row?.nome ?? '';
-
   const closeDeleteConfirm = useCallback(() => {
     if (deleteBusyRef.current) {
       return;
@@ -72,10 +70,10 @@ export function ProdutoAcoesCell(props: CustomCellRendererProps<ProdutoGridRow>)
 
   return (
     <>
-    <div className="flex items-center justify-center gap-1">
+    <div className="produto-acoes-cell-inner flex items-center justify-center gap-1">
       <Link
         to={`/admin/produtos/${id}`}
-        className="inline-flex rounded border-0 bg-transparent p-1.5 text-blue-600 shadow-none hover:text-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-500"
+        className="rounded-md border-0 bg-transparent p-1.5 text-[#0D6EFD] shadow-none transition-colors hover:bg-[#0D6EFD]/10 focus:outline-none focus:ring-2 focus:ring-[rgba(13,110,253,0.45)] focus:ring-offset-0"
         aria-label={t('modules.productsAdmin.editLink')}
         title={t('modules.productsAdmin.editLink')}
         onClick={(e) => e.stopPropagation()}
@@ -85,7 +83,7 @@ export function ProdutoAcoesCell(props: CustomCellRendererProps<ProdutoGridRow>)
       <button
         type="button"
         disabled={deleting}
-        className="inline-flex rounded border-0 bg-transparent p-1.5 text-red-600 shadow-none hover:text-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-red-500 disabled:opacity-50"
+        className="rounded-md border-0 bg-transparent p-1.5 text-[#DC3545] shadow-none transition-colors hover:bg-[#DC3545]/10 focus:outline-none focus:ring-2 focus:ring-[rgba(220,53,69,0.35)] focus:ring-offset-0 disabled:opacity-50"
         aria-label={t('modules.productsAdmin.deleteRowAria')}
         title={t('modules.productsAdmin.deleteRowAria')}
         onClick={openDeleteConfirm}
@@ -95,8 +93,7 @@ export function ProdutoAcoesCell(props: CustomCellRendererProps<ProdutoGridRow>)
     </div>
     <ProdutoDeleteConfirmModal
       open={deleteConfirmOpen}
-      productId={id}
-      productName={productName}
+      variant="single"
       confirming={deleting}
       onClose={closeDeleteConfirm}
       onConfirm={executeDelete}

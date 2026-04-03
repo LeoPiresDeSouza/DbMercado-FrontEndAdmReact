@@ -88,8 +88,8 @@ export const CATALOG_COLUMN_PANEL_HEAD_CSS = `
 #dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-pivot-mode-panel {
   border: none !important;
   box-shadow:
-    inset 0 1px 0 0 #e2e8f0,
-    inset 0 -1px 0 0 #e2e8f0 !important;
+    inset 0 1px 0 0 #2d3748,
+    inset 0 -1px 0 0 #2d3748 !important;
 }
 #dbmercado-produtos-grid-host .ag-column-panel .ag-column-select.ag-column-panel-column-select {
   box-sizing: border-box !important;
@@ -127,7 +127,8 @@ export const CATALOG_COLUMN_PANEL_HEAD_CSS = `
   border-right: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
   border-bottom: none !important;
   border-radius: 10px !important;
-  background-color: var(--ag-background-color, #fff) !important;
+  background-color: var(--ag-input-background-color, #0f1419) !important;
+  color: var(--ag-input-text-color, #ffffff) !important;
   min-height: 34px !important;
   padding-inline-start: 32px !important;
   padding-inline-end: 12px !important;

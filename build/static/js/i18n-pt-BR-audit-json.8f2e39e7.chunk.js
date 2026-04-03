@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkdbmercadofrontend=globalThis.webpackChunkdbmercadofrontend||[]).push([[762],{325(e){e.exports=JSON.parse('{"page":{"title":"Auditoria","description":"Consulta de trilhas de auditoria e eventos administrativos. Em desenvolvimento."}}')}}]);

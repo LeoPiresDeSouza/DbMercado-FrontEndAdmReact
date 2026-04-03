@@ -65,7 +65,7 @@ export function AdminRealtimeProvider({
     }
 
     const connection = createAdminSignalRConnection({
-      debug: process.env.NODE_ENV === 'development',
+      debug: import.meta.env.DEV,
       onAfterReconnected: (conn) => {
         void (async () => {
           await subscribeAdminRealtimeChannels(conn, ADMIN_REALTIME_CHANNELS);

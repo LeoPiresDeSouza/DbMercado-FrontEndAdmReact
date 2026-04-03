@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { usuarioTemModuloProduto } from '../../../shared/constants/produtoModulo';
 import { useModulosUsuarioStore } from '../../../shared/stores/modulosUsuarioStore';
 import { useNotificationCenterStore } from '../../../shared/stores/notificationCenterStore';
@@ -99,7 +100,7 @@ function ProdutoEditarPage(): React.ReactElement {
   if (carregandoModulos) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-6">
-        <p className="text-sm text-neutral-600">{t('modules.productsAdmin.loadingModules')}</p>
+        <p className="text-sm text-[#718096]">{t('modules.productsAdmin.loadingModules')}</p>
       </div>
     );
   }
@@ -107,7 +108,7 @@ function ProdutoEditarPage(): React.ReactElement {
   if (!podeVer) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-6">
-        <p className="text-sm text-neutral-600">{t('modules.productsAdmin.noAccess')}</p>
+        <p className="text-sm text-[#718096]">{t('modules.productsAdmin.noAccess')}</p>
       </div>
     );
   }
@@ -115,8 +116,11 @@ function ProdutoEditarPage(): React.ReactElement {
   if (!idValid) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 px-6">
-        <p className="text-sm text-neutral-600">{t('modules.productsAdmin.invalidId')}</p>
-        <Link to="/admin/produtos" className="text-sm font-medium text-sky-700 hover:underline">
+        <p className="text-sm text-[#718096]">{t('modules.productsAdmin.invalidId')}</p>
+        <Link
+          to="/admin/produtos"
+          className="text-sm font-medium text-[#0D6EFD] hover:text-[#0B5ED7] hover:underline"
+        >
           {t('modules.productsAdmin.backToList')}
         </Link>
       </div>
@@ -126,7 +130,7 @@ function ProdutoEditarPage(): React.ReactElement {
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-6">
-        <p className="text-sm text-neutral-600">{t('modules.productsAdmin.loadingProduct')}</p>
+        <p className="text-sm text-[#718096]">{t('modules.productsAdmin.loadingProduct')}</p>
       </div>
     );
   }
@@ -134,49 +138,57 @@ function ProdutoEditarPage(): React.ReactElement {
   if (loadError) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 px-6">
-        <p className="max-w-md text-center text-sm text-red-700">{loadError}</p>
-        <Link to="/admin/produtos" className="text-sm font-medium text-sky-700 hover:underline">
+        <p className="max-w-md text-center text-sm text-[#DC3545]">{loadError}</p>
+        <Link
+          to="/admin/produtos"
+          className="text-sm font-medium text-[#0D6EFD] hover:text-[#0B5ED7] hover:underline"
+        >
           {t('modules.productsAdmin.backToList')}
         </Link>
       </div>
     );
   }
 
+  const formTitle = t('modules.productsAdmin.formTitleEdit', { id });
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="mx-auto w-full max-w-5xl">
-        <div className="mb-6 flex flex-col gap-4 border-b border-neutral-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <Link
               to="/admin/produtos"
-              className="mb-2 inline-block text-sm font-medium text-sky-700 hover:text-sky-900 hover:underline"
+              className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#0D6EFD] transition-colors hover:text-[#0B5ED7] hover:underline"
             >
-              ← {t('modules.productsAdmin.backToList')}
+              <ArrowLeft size={16} aria-hidden />
+              {t('modules.productsAdmin.backToList')}
             </Link>
-            <h1 className="text-xl font-semibold tracking-tight text-neutral-900 md:text-2xl">
-              {t('modules.productsAdmin.formTitleEdit', { id })}
-            </h1>
+            <h1 className="text-2xl font-bold text-white">{formTitle}</h1>
+            <p className="mt-0.5 text-sm text-[#718096]">{t('modules.productsAdmin.subtitle')}</p>
           </div>
         </div>
 
-        <form onSubmit={(e) => void handleSubmit(e)} className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm md:p-8">
-          <ProdutoForm values={values} onChange={patch} errors={errors} disabled={submitting} />
-
-          <div className="mt-10 flex flex-col-reverse gap-3 border-t border-neutral-200 pt-8 sm:flex-row sm:justify-end">
-            <Link
-              to="/admin/produtos"
-              className="inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-800 shadow-sm hover:bg-neutral-50"
-            >
-              {t('modules.productsAdmin.cancel')}
-            </Link>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="inline-flex items-center justify-center rounded-md bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {submitting ? t('modules.productsAdmin.saving') : t('modules.productsAdmin.save')}
-            </button>
+        <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col">
+          <div className="sticky top-0 z-10 mb-6 flex flex-col gap-4 rounded-xl border border-[#2D3748] bg-[rgba(20,27,45,0.95)] px-6 py-4 shadow-md backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-white">{formTitle}</h2>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <Link
+                to="/admin/produtos"
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-[#2D3748] bg-[#141B2D] px-5 py-2.5 text-sm font-medium text-[#ADB5BD] shadow-sm transition-all hover:border-[#4A5568] hover:text-white focus:outline-none focus:ring-2 focus:ring-[rgba(13,110,253,0.3)]"
+              >
+                {t('modules.productsAdmin.cancel')}
+              </Link>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#0D6EFD] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0B5ED7] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[rgba(13,110,253,0.45)] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {submitting ? t('modules.productsAdmin.saving') : t('modules.productsAdmin.save')}
+              </button>
+            </div>
           </div>
+
+          <ProdutoForm values={values} onChange={patch} errors={errors} disabled={submitting} />
         </form>
       </div>
     </div>

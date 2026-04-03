@@ -15,7 +15,7 @@ src/
 │   └── global.css
 ├── integrations/         # Adaptadores externos (HTTP, futuros SDKs)
 │   └── api/
-│       ├── config.js       # REACT_APP_API_BASE_URL / fallback localhost
+│       ├── config.js       # VITE_API_BASE_URL / fallback localhost
 │       └── httpClient.js
 ├── modules/                # Domínios de negócio (feature folders)
 │   ├── auth/               # Login, JWT localStorage, authService
@@ -64,7 +64,7 @@ src/
 
 ## 4) Variáveis de ambiente
 
-- `REACT_APP_API_BASE_URL` — URL base da API .NET (padrão `http://localhost:5046`).
+- `VITE_API_BASE_URL` ou `VITE_DOTNET_API_BASE_URL` — URL base da API .NET (padrão `http://localhost:5046`).
 
 ## 5) Comportamento preservado
 

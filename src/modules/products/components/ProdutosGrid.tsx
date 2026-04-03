@@ -11,6 +11,7 @@ import type {
   GridReadyEvent,
   GridSizeChangedEvent,
   IServerSideDatasource,
+  ModelUpdatedEvent,
   PaginationChangedEvent,
   RowSelectionOptions,
   SideBarDef,
@@ -38,6 +39,7 @@ import {
   type ProdutoGridColumnVo,
   type ProdutoGridRow,
 } from '../services/produtoService';
+import { ProdutosGridEmptyOverlay } from './ProdutosGridEmptyOverlay';
 
 /** Limite superior do bloco ao exibir “todos” (alinhado ao teto do servidor: 200 por requisição). */
 const PRODUTOS_GRID_BLOCK_SIZE_ALL = 250_000;
@@ -120,6 +122,18 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
 
   const gridSizeFitDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dragAdminScrollCleanupRef = useRef<(() => void) | null>(null);
+  /**
+   * SSRM: não usar `paginationGetRowCount()` para vazio — pode ficar 0 fora de sincrono com o total real.
+   * Guardamos o `rowCount` do último `params.success` (API .NET) e só mostramos o overlay quando o servidor
+   * reporta total 0 (catálogo vazio ou filtro sem resultados naquele nível).
+   */
+  const ssrmLoadedAfterSuccessRef = useRef(false);
+  const ssrmLastRowCountRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    ssrmLoadedAfterSuccessRef.current = false;
+    ssrmLastRowCountRef.current = null;
+  }, [pageSize]);
 
   const stopDragAdminScroll = useCallback(() => {
     dragAdminScrollCleanupRef.current?.();
@@ -156,10 +170,27 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
 
   const blockSize = resolveProdutosGridBlockSize(pageSize);
 
+  const syncNoRowsOverlayRef = useRef<((api: GridApi<ProdutoGridRow>) => void) | null>(null);
+
+  const syncNoRowsOverlay = useCallback((api: GridApi<ProdutoGridRow>) => {
+    if (api.isDestroyed() || !ssrmLoadedAfterSuccessRef.current) {
+      return;
+    }
+    const serverTotal = ssrmLastRowCountRef.current ?? -1;
+    if (serverTotal === 0) {
+      api.showNoRowsOverlay();
+    } else {
+      api.hideOverlay();
+    }
+  }, []);
+
+  syncNoRowsOverlayRef.current = syncNoRowsOverlay;
+
   const serverSideDatasource = useMemo<IServerSideDatasource<ProdutoGridRow>>(
     () => ({
       getRows: (params) => {
         if (!authService.isAuthenticated()) {
+          ssrmLoadedAfterSuccessRef.current = false;
           params.fail();
           return;
         }
@@ -181,9 +212,17 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
               valueCols: mapColumnVoList(request.valueCols ?? []),
               pivotMode: request.pivotMode ?? false,
             });
+            ssrmLastRowCountRef.current = result.rowCount;
+            ssrmLoadedAfterSuccessRef.current = true;
             params.success({ rowData: result.rows, rowCount: result.rowCount });
+            requestAnimationFrame(() => {
+              if (!params.api.isDestroyed()) {
+                syncNoRowsOverlayRef.current?.(params.api);
+              }
+            });
           } catch (error: unknown) {
             onDatasourceErrorRef.current?.(error);
+            ssrmLoadedAfterSuccessRef.current = false;
             params.fail();
           }
         })();
@@ -304,26 +343,18 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
   );
 
   /**
-   * O AG Grid não faz auto-scroll em contentores com `overflow: auto` (ex.: `.admin-content`).
-   * Durante arraste de coluna para o painel, aproximar o rato do topo/fundo do main faz scroll.
+   * O AG Grid não faz auto-scroll no documento durante arraste. Com scroll só na janela (`.admin-content`
+   * em `overflow: visible`), aproximar o rato do topo/fundo do viewport faz `window.scrollBy`.
    */
   const handleDragStarted = useCallback(() => {
     stopDragAdminScroll();
-    const host = document.getElementById(PRODUTOS_GRID_HOST_ID);
-    const scrollEl =
-      (host?.closest('main.admin-content') as HTMLElement | null) ??
-      (document.querySelector('main.admin-content') as HTMLElement | null);
-    if (scrollEl == null) {
-      return;
-    }
 
     const onMove = (ev: MouseEvent): void => {
-      const rect = scrollEl.getBoundingClientRect();
       const y = ev.clientY;
-      if (y > rect.bottom - ADMIN_DRAG_SCROLL_EDGE_PX) {
-        scrollEl.scrollTop += ADMIN_DRAG_SCROLL_STEP_PX;
-      } else if (y < rect.top + ADMIN_DRAG_SCROLL_EDGE_PX) {
-        scrollEl.scrollTop = Math.max(0, scrollEl.scrollTop - ADMIN_DRAG_SCROLL_STEP_PX);
+      if (y > window.innerHeight - ADMIN_DRAG_SCROLL_EDGE_PX) {
+        window.scrollBy(0, ADMIN_DRAG_SCROLL_STEP_PX);
+      } else if (y < ADMIN_DRAG_SCROLL_EDGE_PX) {
+        window.scrollBy(0, -ADMIN_DRAG_SCROLL_STEP_PX);
       }
     };
 
@@ -367,12 +398,23 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
     (event: FirstDataRenderedEvent<ProdutoGridRow>) => {
       onFirstDataRendered(event);
       requestAnimationFrame(() => {
+        syncNoRowsOverlay(event.api);
         if (!event.api.isDestroyed()) {
           event.api.sizeColumnsToFit();
         }
       });
     },
-    [onFirstDataRendered]
+    [onFirstDataRendered, syncNoRowsOverlay]
+  );
+
+  const handleModelUpdated = useCallback(
+    (event: ModelUpdatedEvent<ProdutoGridRow>) => {
+      if (!ssrmLoadedAfterSuccessRef.current) {
+        return;
+      }
+      requestAnimationFrame(() => syncNoRowsOverlay(event.api));
+    },
+    [syncNoRowsOverlay]
   );
 
   const handleGridSizeChanged = useCallback((event: GridSizeChangedEvent<ProdutoGridRow>) => {
@@ -415,6 +457,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
         theme={produtosCatalogoQuartzTheme}
         loadThemeGoogleFonts
         themeStyleContainer={typeof document !== 'undefined' ? () => document.head : undefined}
+        noRowsOverlayComponent={ProdutosGridEmptyOverlay}
         sideBar={sideBar}
         gridApiRef={gridApiRef}
         initialState={PRODUTOS_GRID_INITIAL_STATE}
@@ -446,6 +489,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
         alwaysShowVerticalScroll={false}
         onGridReady={handleGridReady}
         onFirstDataRendered={handleFirstDataRendered}
+        onModelUpdated={handleModelUpdated}
         onGridSizeChanged={handleGridSizeChanged}
         onDragStarted={handleDragStarted}
         onDragStopped={handleDragStopped}

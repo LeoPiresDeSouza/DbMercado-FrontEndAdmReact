@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkdbmercadofrontend=globalThis.webpackChunkdbmercadofrontend||[]).push([[659],{12(e){e.exports=JSON.parse('{"page":{"title":"Audit","description":"Audit trails and administrative events. In development."}}')}}]);

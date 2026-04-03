@@ -4,27 +4,36 @@ import { TriangleAlert } from 'lucide-react';
 import { Modal } from '../../../design-system/components/Modal/Modal';
 import { Button } from '../../../design-system/components/Button/Button';
 
+export type ProdutoDeleteConfirmVariant = 'single' | 'bulk';
+
 export type ProdutoDeleteConfirmModalProps = {
   open: boolean;
-  productName: string;
-  productId: number;
+  variant: ProdutoDeleteConfirmVariant;
   confirming: boolean;
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
 };
 
 /**
- * Confirmação de exclusão de linha no grid: estilo alinhado ao shell (superfície + borda)
- * com destaque âmbar, ícone de aviso e texto de corpo em azul escuro para contraste.
+ * Confirmação de exclusão (uma linha ou várias): mensagem genérica, sem nome de produto.
  */
 export function ProdutoDeleteConfirmModal(props: ProdutoDeleteConfirmModalProps): React.ReactElement | null {
-  const { open, productName, productId, confirming, onClose, onConfirm } = props;
+  const { open, variant, confirming, onClose, onConfirm } = props;
   const { t } = useTranslation('common');
+
+  const titleKey =
+    variant === 'bulk'
+      ? 'modules.productsAdmin.deleteConfirmTitleBulk'
+      : 'modules.productsAdmin.deleteConfirmTitle';
+  const leadKey =
+    variant === 'bulk'
+      ? 'modules.productsAdmin.deleteConfirmLeadBulk'
+      : 'modules.productsAdmin.deleteConfirmLeadSingle';
 
   return (
     <Modal
       open={open}
-      title={t('modules.productsAdmin.deleteConfirmTitle')}
+      title={t(titleKey)}
       titleClassName="!text-amber-600 dark:!text-amber-400"
       onClose={onClose}
       size="sm"
@@ -60,10 +69,10 @@ export function ProdutoDeleteConfirmModal(props: ProdutoDeleteConfirmModalProps)
           </div>
           <div className="min-w-0 flex-1 space-y-2">
             <p className="text-[0.9375rem] font-semibold leading-snug text-blue-800 dark:text-blue-200">
-              {t('modules.productsAdmin.deleteConfirmLead', { nome: productName })}
+              {t(leadKey)}
             </p>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              {t('modules.productsAdmin.deleteConfirmBody', { id: productId })}
+              {t('modules.productsAdmin.deleteConfirmBody')}
             </p>
           </div>
         </div>

@@ -109,8 +109,8 @@ const produtosCatalogoColumnPanelPart = createPart({
 .ag-side-bar .ag-column-panel .ag-pivot-mode-panel {
   border: none !important;
   box-shadow:
-    inset 0 1px 0 0 #e2e8f0,
-    inset 0 -1px 0 0 #e2e8f0 !important;
+    inset 0 1px 0 0 #2d3748,
+    inset 0 -1px 0 0 #2d3748 !important;
 }
 
 .ag-column-select {
@@ -197,7 +197,8 @@ ag-input-text-field.ag-column-select-header-filter-wrapper > div:first-child {
   border-right: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
   border-bottom: none !important;
   border-radius: 10px !important;
-  background-color: var(--ag-background-color, #fff) !important;
+  background-color: var(--ag-input-background-color, #0f1419) !important;
+  color: var(--ag-input-text-color, #ffffff) !important;
   box-shadow: none !important;
   min-height: 34px !important;
   /* Não usar padding-inline simétrico: o Quartz coloca a lupa em ::before e exige ~26px à esquerda. */
@@ -235,27 +236,65 @@ export const produtosCatalogoQuartzTheme = themeQuartz
     headerHeight: CATALOG_GRID_HEADER_PX,
     rowHeight: CATALOG_GRID_HEADER_PX,
 
+    /* Dark ERP — DESIGN_SYSTEM.md §10 (antes: Quartz claro + células #fff em global.css = texto invisível). */
+    browserColorScheme: 'dark',
+    backgroundColor: '#141B2D',
+    foregroundColor: '#FFFFFF',
+    chromeBackgroundColor: '#141B2D',
+    headerBackgroundColor: '#0F1419',
+    headerTextColor: '#ADB5BD',
+    borderColor: '#2D3748',
+    oddRowBackgroundColor: '#141B2D',
+    rowHoverColor: 'rgba(13, 110, 253, 0.08)',
+    selectedRowBackgroundColor: 'rgba(13, 110, 253, 0.15)',
+
     /* Quadradinho com cantos leves + preenchimento sólido ao marcar (demo Quartz / referência anexa). */
     checkboxBorderRadius: CATALOG_CHECKBOX_BORDER_RADIUS_PX,
     checkboxBorderWidth: 1,
     checkboxCheckedBackgroundColor: catalogAccent,
     checkboxCheckedBorderColor: catalogAccent,
     checkboxCheckedShapeColor: '#ffffff',
-    checkboxUncheckedBackgroundColor: '#ffffff',
-    /* Borda levemente “azul acento” como nas demos Colunas (não só cinza). */
-    checkboxUncheckedBorderColor: `color-mix(in srgb, ${catalogAccent} 40%, #cbd5e1)`,
-    checkboxIndeterminateBackgroundColor: '#f1f5f9',
-    checkboxIndeterminateBorderColor: '#cbd5e1',
-    checkboxIndeterminateShapeColor: '#64748b',
+    checkboxUncheckedBackgroundColor: '#141B2D',
+    checkboxUncheckedBorderColor: `color-mix(in srgb, ${catalogAccent} 40%, #2D3748)`,
+    checkboxIndeterminateBackgroundColor: '#1E293B',
+    checkboxIndeterminateBorderColor: '#2D3748',
+    checkboxIndeterminateShapeColor: '#ADB5BD',
 
-    columnBorder: '1px solid #e2e8f0',
-    headerColumnBorder: '1px solid #e2e8f0',
+    columnBorder: '1px solid #2D3748',
+    headerColumnBorder: '1px solid #2D3748',
     headerColumnBorderHeight: '100%',
-    headerRowBorder: '1px solid #e2e8f0',
-    rowBorder: '1px solid #f1f5f9',
+    headerRowBorder: '1px solid #2D3748',
+    rowBorder: '1px solid #1E293B',
 
     sideBarPanelWidth: CATALOG_SIDEBAR_PANEL_PX,
-    wrapperBorder: '1px solid #e5e7eb',
+
+    /* Barra lateral: contrastar faixa de ícones vs painel (evita “tudo #141B2D”). */
+    sideBarBackgroundColor: '#141B2D',
+    sideButtonBarBackgroundColor: '#0F1419',
+    sideButtonBackgroundColor: 'transparent',
+    sideButtonTextColor: '#718096',
+    sideButtonHoverBackgroundColor: '#1E293B',
+    sideButtonHoverTextColor: '#FFFFFF',
+    sideButtonSelectedBackgroundColor: '#1E293B',
+    sideButtonSelectedTextColor: '#FFFFFF',
+    sideButtonSelectedUnderlineColor: catalogAccent,
+    sideButtonBorder: '1px solid #2D3748',
+    sideButtonSelectedBorder: '1px solid #2D3748',
+    sidePanelBorder: '1px solid #2D3748',
+    toolPanelSeparatorBorder: '1px solid #2D3748',
+
+    /* Inputs nos painéis Colunas / Filtros */
+    inputBackgroundColor: '#0F1419',
+    inputBorder: '1px solid #2D3748',
+    inputTextColor: '#FFFFFF',
+    inputPlaceholderTextColor: '#718096',
+    inputIconColor: '#718096',
+    inputFocusBackgroundColor: '#0F1419',
+    inputFocusBorder: '1px solid #0091ff',
+    inputFocusTextColor: '#FFFFFF',
+    inputFocusShadow: '0 0 0 2px rgba(0, 145, 255, 0.28)',
+
+    wrapperBorder: '1px solid #2D3748',
     wrapperBorderRadius: 8,
   })
   .withPart(produtosCatalogoColumnPanelPart);

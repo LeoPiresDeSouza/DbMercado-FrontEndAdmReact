@@ -1,12 +1,14 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { Plus, RefreshCw, Trash2 } from 'lucide-react';
 import type { GridApi } from 'ag-grid-community';
 import { usuarioTemModuloProduto } from '../../../shared/constants/produtoModulo';
 import { useModulosUsuarioStore } from '../../../shared/stores/modulosUsuarioStore';
 import { useNotificationCenterStore } from '../../../shared/stores/notificationCenterStore';
 import { resolveLocalizedErrorMessage } from '../../../shared/utils/resolveLocalizedErrorMessage';
 import ProdutosGrid, { type ProdutosGridPageSizeOption } from '../components/ProdutosGrid';
+import { ProdutoDeleteConfirmModal } from '../grid/ProdutoDeleteConfirmModal';
 import { excluirProduto, type ProdutoGridRow } from '../services/produtoService';
 
 function ProductsListPage(): React.ReactElement {
@@ -14,7 +16,10 @@ function ProductsListPage(): React.ReactElement {
   const modulos = useModulosUsuarioStore((s) => s.modulos);
   const addNotification = useNotificationCenterStore((s) => s.add);
   const gridApiRef = useRef<GridApi<ProdutoGridRow> | null>(null);
+  const pendingBulkDeleteIdsRef = useRef<number[]>([]);
   const [gridPageSize, setGridPageSize] = useState<ProdutosGridPageSizeOption>(20);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const podeVerProdutos = modulos !== null && usuarioTemModuloProduto(modulos);
   const carregandoModulos = modulos === null;
@@ -34,7 +39,7 @@ function ProductsListPage(): React.ReactElement {
     [addNotification, t]
   );
 
-  const handleExcluirSelecionados = useCallback(async () => {
+  const openBulkDeleteConfirm = useCallback(() => {
     const api = gridApiRef.current;
     if (!api) {
       return;
@@ -48,13 +53,32 @@ function ProductsListPage(): React.ReactElement {
       });
       return;
     }
+    pendingBulkDeleteIdsRef.current = selected.map((r) => r.id);
+    setBulkDeleteOpen(true);
+  }, [addNotification, t]);
+
+  const closeBulkDeleteConfirm = useCallback(() => {
+    if (bulkDeleting) {
+      return;
+    }
+    setBulkDeleteOpen(false);
+    pendingBulkDeleteIdsRef.current = [];
+  }, [bulkDeleting]);
+
+  const confirmBulkDelete = useCallback(async () => {
+    const api = gridApiRef.current;
+    const ids = [...pendingBulkDeleteIdsRef.current];
+    if (ids.length === 0 || api == null) {
+      return;
+    }
+    setBulkDeleting(true);
     try {
-      for (const row of selected) {
-        await excluirProduto(row.id);
+      for (const id of ids) {
+        await excluirProduto(id);
       }
       addNotification({
         title: t('modules.productsAdmin.deleteOkTitle'),
-        body: t('modules.productsAdmin.deleteOkBody', { count: selected.length }),
+        body: t('modules.productsAdmin.deleteOkBody', { count: ids.length }),
         severity: 'success',
       });
       refreshGrid();
@@ -66,13 +90,17 @@ function ProductsListPage(): React.ReactElement {
         severity: 'error',
       });
       refreshGrid();
+    } finally {
+      setBulkDeleting(false);
+      setBulkDeleteOpen(false);
+      pendingBulkDeleteIdsRef.current = [];
     }
   }, [addNotification, refreshGrid, t]);
 
   if (carregandoModulos) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-6 py-16">
-        <p className="text-center text-sm text-neutral-600">{t('modules.productsAdmin.loadingModules')}</p>
+        <p className="text-center text-sm text-[#718096]">{t('modules.productsAdmin.loadingModules')}</p>
       </div>
     );
   }
@@ -80,27 +108,24 @@ function ProductsListPage(): React.ReactElement {
   if (!podeVerProdutos) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-6 py-16">
-        <p className="max-w-md text-center text-sm text-neutral-600">{t('modules.productsAdmin.noAccess')}</p>
+        <p className="max-w-md text-center text-sm text-[#718096]">{t('modules.productsAdmin.noAccess')}</p>
       </div>
     );
   }
 
   return (
     <div className="flex w-full flex-col pb-8 pt-2">
-      <header
-        className="mb-4 shrink-0 border-b border-gray-200 pb-4 pt-1"
-        aria-label={t('modules.productsAdmin.title')}
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <header className="mb-8 shrink-0" aria-label={t('modules.productsAdmin.title')}>
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold text-gray-900">{t('modules.productsAdmin.toolbarGridTitle')}</h1>
-            <p className="mt-1 max-w-2xl text-sm text-gray-600">{t('modules.productsAdmin.subtitleList')}</p>
+            <h1 className="text-2xl font-bold text-white">{t('modules.productsAdmin.toolbarGridTitle')}</h1>
+            <p className="mt-0.5 max-w-2xl text-sm text-[#718096]">{t('modules.productsAdmin.subtitleList')}</p>
           </div>
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-            <label className="flex items-center gap-2 text-sm text-gray-700">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
+            <label className="flex items-center gap-2 text-sm text-[#ADB5BD]">
               <span className="whitespace-nowrap">{t('modules.productsAdmin.gridPageSizeLabel')}</span>
               <select
-                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="h-10 rounded-md border border-[#2D3748] bg-[#141B2D] px-3 text-sm text-white shadow-sm focus:border-[#0D6EFD] focus:outline-none focus:ring-2 focus:ring-[rgba(13,110,253,0.45)]"
                 aria-label={t('modules.productsAdmin.gridPageSizeLabel')}
                 value={gridPageSize === 'all' ? 'all' : String(gridPageSize)}
                 onChange={(e) => {
@@ -118,22 +143,25 @@ function ProductsListPage(): React.ReactElement {
             </label>
             <button
               type="button"
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50"
+              className="inline-flex items-center gap-2 rounded-md border border-[#2D3748] bg-[#141B2D] px-4 py-2 text-sm font-medium text-[#ADB5BD] shadow-sm transition-all hover:border-[#4A5568] hover:text-white focus:outline-none focus:ring-2 focus:ring-[rgba(13,110,253,0.3)]"
               onClick={() => refreshGrid()}
             >
+              <RefreshCw size={16} aria-hidden />
               {t('modules.productsAdmin.refresh')}
             </button>
             <button
               type="button"
-              className="rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50"
-              onClick={() => void handleExcluirSelecionados()}
+              className="inline-flex items-center gap-2 rounded-md border border-[#DC3545]/30 bg-[#DC3545]/10 px-4 py-2 text-sm font-medium text-[#DC3545] transition-all hover:bg-[#DC3545]/20 focus:outline-none focus:ring-2 focus:ring-[rgba(220,53,69,0.25)]"
+              onClick={openBulkDeleteConfirm}
             >
+              <Trash2 size={16} aria-hidden />
               {t('modules.productsAdmin.deleteSelected')}
             </button>
             <Link
               to="/admin/produtos/novo"
-              className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-md bg-[#0D6EFD] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0B5ED7] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[rgba(13,110,253,0.45)]"
             >
+              <Plus size={16} aria-hidden />
               {t('modules.productsAdmin.toolbarNewProduct')}
             </Link>
           </div>
@@ -151,6 +179,14 @@ function ProductsListPage(): React.ReactElement {
           onPageSizeChange={setGridPageSize}
         />
       </section>
+
+      <ProdutoDeleteConfirmModal
+        open={bulkDeleteOpen}
+        variant="bulk"
+        confirming={bulkDeleting}
+        onClose={closeBulkDeleteConfirm}
+        onConfirm={confirmBulkDelete}
+      />
     </div>
   );
 }

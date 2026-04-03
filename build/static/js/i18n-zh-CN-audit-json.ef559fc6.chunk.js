@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkdbmercadofrontend=globalThis.webpackChunkdbmercadofrontend||[]).push([[317],{394(e){e.exports=JSON.parse('{"page":{"title":"\u5ba1\u8ba1","description":"\u5ba1\u8ba1\u8f68\u8ff9\u4e0e\u7ba1\u7406\u4e8b\u4ef6\u3002\u5f00\u53d1\u4e2d\u3002"}}')}}]);
