@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -7,7 +7,17 @@ import { useModulosUsuarioStore } from '../../../shared/stores/modulosUsuarioSto
 import { useNotificationCenterStore } from '../../../shared/stores/notificationCenterStore';
 import { resolveLocalizedErrorMessage } from '../../../shared/utils/resolveLocalizedErrorMessage';
 import ProdutoForm from '../components/ProdutoForm';
-import { criarProduto } from '../services/produtoService';
+import {
+  criarProduto,
+  listarOrigensGeograficasProduto,
+  listarTiposEmbalagemProduto,
+  listarUnidadesComercializacaoProduto,
+  listarUnidadesDimensaoProduto,
+  listarUnidadesMedidaProduto,
+  listarUnidadesPesoProduto,
+  type ProdutoFormOpcoesCatalogo,
+  type ProdutoUnidadeMedidaOpcao,
+} from '../services/produtoService';
 import { createEmptyProdutoFormValues, type ProdutoFormValues } from '../types/produtoFormValues';
 import { produtoFormValuesToUpsert } from '../utils/produtoFormMappers';
 import { validateProdutoForm } from '../utils/validateProdutoForm';
@@ -21,6 +31,16 @@ function ProdutoNovoPage(): React.ReactElement {
   const [values, setValues] = useState(createEmptyProdutoFormValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [opcoesCatalogo, setOpcoesCatalogo] = useState<ProdutoFormOpcoesCatalogo>({
+    comercializacao: [],
+    medidaFisica: [],
+    tipoEmbalagem: [],
+    dimensao: [],
+    peso: [],
+  });
+  const [opcoesCatalogoCarregando, setOpcoesCatalogoCarregando] = useState(false);
+  const [origensGeograficas, setOrigensGeograficas] = useState<ProdutoUnidadeMedidaOpcao[]>([]);
+  const [origensGeograficasCarregando, setOrigensGeograficasCarregando] = useState(false);
 
   const podeVer = modulos !== null && usuarioTemModuloProduto(modulos);
   const carregandoModulos = modulos === null;
@@ -28,6 +48,56 @@ function ProdutoNovoPage(): React.ReactElement {
   const patch = useCallback((p: Partial<ProdutoFormValues>) => {
     setValues((s) => ({ ...s, ...p }));
   }, []);
+
+  useEffect(() => {
+    if (!podeVer) {
+      return;
+    }
+    let cancelled = false;
+    setOpcoesCatalogoCarregando(true);
+    setOrigensGeograficasCarregando(true);
+    void Promise.all([
+      listarUnidadesComercializacaoProduto(),
+      listarUnidadesMedidaProduto(),
+      listarTiposEmbalagemProduto(),
+      listarUnidadesDimensaoProduto(),
+      listarUnidadesPesoProduto(),
+      listarOrigensGeograficasProduto(),
+    ])
+      .then(([com, fis, emb, dim, peso, origens]) => {
+        if (!cancelled) {
+          setOpcoesCatalogo({
+            comercializacao: com,
+            medidaFisica: fis,
+            tipoEmbalagem: emb,
+            dimensao: dim,
+            peso,
+          });
+          setOrigensGeograficas(origens);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOpcoesCatalogo({
+            comercializacao: [],
+            medidaFisica: [],
+            tipoEmbalagem: [],
+            dimensao: [],
+            peso: [],
+          });
+          setOrigensGeograficas([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setOpcoesCatalogoCarregando(false);
+          setOrigensGeograficasCarregando(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [podeVer]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -112,7 +182,16 @@ function ProdutoNovoPage(): React.ReactElement {
             </div>
           </div>
 
-          <ProdutoForm values={values} onChange={patch} errors={errors} disabled={submitting} />
+          <ProdutoForm
+            values={values}
+            onChange={patch}
+            errors={errors}
+            disabled={submitting}
+            opcoesCatalogo={opcoesCatalogo}
+            opcoesCatalogoCarregando={opcoesCatalogoCarregando}
+            origensGeograficasOpcoes={origensGeograficas}
+            origensGeograficasCarregando={origensGeograficasCarregando}
+          />
         </form>
       </div>
     </div>

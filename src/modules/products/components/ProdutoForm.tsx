@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, Maximize2, Package, Plus, Ruler, Tag } from 'lucide-react';
+import type { ProdutoFormOpcoesCatalogo, ProdutoUnidadeMedidaOpcao } from '../services/produtoService';
 import type { ProdutoFormValues } from '../types/produtoFormValues';
 
 const inputBase =
@@ -48,11 +49,27 @@ function SectionLegend({
   );
 }
 
+function opcoesSelectComValorAtual(
+  opcoes: ProdutoUnidadeMedidaOpcao[],
+  valorAtual: string
+): ProdutoUnidadeMedidaOpcao[] {
+  const codigos = new Set(opcoes.map((o) => o.codigo));
+  const atual = valorAtual.trim();
+  const extra: ProdutoUnidadeMedidaOpcao[] =
+    atual && !codigos.has(atual) ? [{ codigo: atual, rotulo: atual }] : [];
+  return [...extra, ...opcoes];
+}
+
 export type ProdutoFormProps = {
   values: ProdutoFormValues;
   onChange: (patch: Partial<ProdutoFormValues>) => void;
   errors: Record<string, string>;
   disabled?: boolean;
+  opcoesCatalogo: ProdutoFormOpcoesCatalogo;
+  opcoesCatalogoCarregando?: boolean;
+  /** Opções vindas de `dbParametro` (produto / origemGeografica). */
+  origensGeograficasOpcoes: ProdutoUnidadeMedidaOpcao[];
+  origensGeograficasCarregando?: boolean;
 };
 
 function FieldError({ message }: { message?: string }): React.ReactElement | null {
@@ -68,9 +85,49 @@ function cnFieldset(base: string): string {
 }
 
 function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
-  const { values, onChange, errors, disabled } = props;
+  const {
+    values,
+    onChange,
+    errors,
+    disabled,
+    opcoesCatalogo,
+    opcoesCatalogoCarregando,
+    origensGeograficasOpcoes,
+    origensGeograficasCarregando,
+  } = props;
   const { t } = useTranslation('common');
   const p = (name: keyof ProdutoFormValues) => (errors[name as string] ? inputError : inputNormal);
+
+  const opcoesCom = useMemo(
+    () => opcoesSelectComValorAtual(opcoesCatalogo.comercializacao, values.unidadeComercializacao),
+    [opcoesCatalogo.comercializacao, values.unidadeComercializacao]
+  );
+  const opcoesFis = useMemo(
+    () => opcoesSelectComValorAtual(opcoesCatalogo.medidaFisica, values.unidadeMedidaFisica),
+    [opcoesCatalogo.medidaFisica, values.unidadeMedidaFisica]
+  );
+  const opcoesEmbTipo = useMemo(
+    () => opcoesSelectComValorAtual(opcoesCatalogo.tipoEmbalagem, values.tipoEmbalagem),
+    [opcoesCatalogo.tipoEmbalagem, values.tipoEmbalagem]
+  );
+  const opcoesDim = useMemo(() => opcoesCatalogo.dimensao, [opcoesCatalogo.dimensao]);
+  const opcoesPeso = useMemo(() => opcoesCatalogo.peso, [opcoesCatalogo.peso]);
+  const opcoesDimEmb = useMemo(
+    () => opcoesSelectComValorAtual(opcoesDim, values.unidadeDimensaoEmb),
+    [opcoesDim, values.unidadeDimensaoEmb]
+  );
+  const opcoesPesoEmbSel = useMemo(
+    () => opcoesSelectComValorAtual(opcoesPeso, values.unidadePesoEmb),
+    [opcoesPeso, values.unidadePesoEmb]
+  );
+  const opcoesDimP = useMemo(
+    () => opcoesSelectComValorAtual(opcoesDim, values.unidadeDimensaoP),
+    [opcoesDim, values.unidadeDimensaoP]
+  );
+  const opcoesPesoProdSel = useMemo(
+    () => opcoesSelectComValorAtual(opcoesPeso, values.unidadePesoP),
+    [opcoesPeso, values.unidadePesoP]
+  );
 
   const setSku = (index: number, patch: Partial<{ codigo: string; ativo: boolean }>) => {
     const next = values.skus.map((s, i) => (i === index ? { ...s, ...patch } : s));
@@ -126,7 +183,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
 
           <div className="border-t border-[#1E293B] pt-8">
             <p className={subgroupTitleClass}>{t('modules.productsAdmin.subgroupComercial')}</p>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div className={fieldCol}>
                 <label htmlFor="pf-marca" className={labelClass}>
                   {t('modules.productsAdmin.fieldMarca')}
@@ -156,20 +213,6 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                 <FieldError message={errors.modelo} />
               </div>
               <div className={fieldCol}>
-                <label htmlFor="pf-un" className={labelClass}>
-                  {t('modules.productsAdmin.fieldUnidade')}
-                </label>
-                <input
-                  id="pf-un"
-                  type="text"
-                  autoComplete="off"
-                  className={p('unidadeMedida')}
-                  value={values.unidadeMedida}
-                  onChange={(e) => onChange({ unidadeMedida: e.target.value })}
-                />
-                <FieldError message={errors.unidadeMedida} />
-              </div>
-              <div className={fieldCol}>
                 <label htmlFor="pf-gtin" className={labelClass}>
                   {t('modules.productsAdmin.fieldGtin')}
                 </label>
@@ -182,6 +225,63 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                   onChange={(e) => onChange({ gtin: e.target.value })}
                 />
                 <FieldError message={errors.gtin} />
+              </div>
+              <div className={fieldCol}>
+                <label htmlFor="pf-uc" className={labelClass}>
+                  {t('modules.productsAdmin.fieldUnidadeComercializacao')}
+                </label>
+                <select
+                  id="pf-uc"
+                  className={p('unidadeComercializacao')}
+                  value={values.unidadeComercializacao}
+                  disabled={disabled || opcoesCatalogoCarregando}
+                  onChange={(e) => onChange({ unidadeComercializacao: e.target.value })}
+                >
+                  {opcoesCom.map((o) => (
+                    <option key={o.codigo} value={o.codigo}>
+                      {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                    </option>
+                  ))}
+                </select>
+                <FieldError message={errors.unidadeComercializacao} />
+              </div>
+              <div className={fieldCol}>
+                <label htmlFor="pf-uf" className={labelClass}>
+                  {t('modules.productsAdmin.fieldUnidadeMedidaFisica')}
+                </label>
+                <select
+                  id="pf-uf"
+                  className={p('unidadeMedidaFisica')}
+                  value={values.unidadeMedidaFisica}
+                  disabled={disabled || opcoesCatalogoCarregando}
+                  onChange={(e) => onChange({ unidadeMedidaFisica: e.target.value })}
+                >
+                  {opcoesFis.map((o) => (
+                    <option key={o.codigo} value={o.codigo}>
+                      {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                    </option>
+                  ))}
+                </select>
+                <FieldError message={errors.unidadeMedidaFisica} />
+              </div>
+              <div className={fieldCol}>
+                <label htmlFor="pf-te" className={labelClass}>
+                  {t('modules.productsAdmin.fieldTipoEmbalagem')}
+                </label>
+                <select
+                  id="pf-te"
+                  className={p('tipoEmbalagem')}
+                  value={values.tipoEmbalagem}
+                  disabled={disabled || opcoesCatalogoCarregando}
+                  onChange={(e) => onChange({ tipoEmbalagem: e.target.value })}
+                >
+                  {opcoesEmbTipo.map((o) => (
+                    <option key={o.codigo} value={o.codigo}>
+                      {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                    </option>
+                  ))}
+                </select>
+                <FieldError message={errors.tipoEmbalagem} />
               </div>
             </div>
           </div>
@@ -200,14 +300,19 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                 <label htmlFor="pf-origem" className={labelClass}>
                   {t('modules.productsAdmin.fieldOrigemTipo')}
                 </label>
-                <input
+                <select
                   id="pf-origem"
-                  type="text"
-                  autoComplete="off"
                   className={p('origemTipo')}
                   value={values.origemTipo}
+                  disabled={disabled || origensGeograficasCarregando}
                   onChange={(e) => onChange({ origemTipo: e.target.value })}
-                />
+                >
+                  {origensGeograficasOpcoes.map((o) => (
+                    <option key={o.codigo} value={o.codigo}>
+                      {o.rotulo}
+                    </option>
+                  ))}
+                </select>
                 <FieldError message={errors.origemTipo} />
               </div>
               <div className={fieldCol}>
@@ -342,6 +447,46 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
             <FieldError message={errors.pesoEmb} />
           </div>
         </div>
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className={fieldCol}>
+            <label htmlFor="pf-ued" className={labelClass}>
+              {t('modules.productsAdmin.fieldUnidadeDimensaoEmb')}
+            </label>
+            <select
+              id="pf-ued"
+              className={p('unidadeDimensaoEmb')}
+              value={values.unidadeDimensaoEmb}
+              disabled={disabled || opcoesCatalogoCarregando}
+              onChange={(e) => onChange({ unidadeDimensaoEmb: e.target.value })}
+            >
+              {opcoesDimEmb.map((o) => (
+                <option key={o.codigo} value={o.codigo}>
+                  {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                </option>
+              ))}
+            </select>
+            <FieldError message={errors.unidadeDimensaoEmb} />
+          </div>
+          <div className={fieldCol}>
+            <label htmlFor="pf-uep" className={labelClass}>
+              {t('modules.productsAdmin.fieldUnidadePesoEmb')}
+            </label>
+            <select
+              id="pf-uep"
+              className={p('unidadePesoEmb')}
+              value={values.unidadePesoEmb}
+              disabled={disabled || opcoesCatalogoCarregando}
+              onChange={(e) => onChange({ unidadePesoEmb: e.target.value })}
+            >
+              {opcoesPesoEmbSel.map((o) => (
+                <option key={o.codigo} value={o.codigo}>
+                  {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                </option>
+              ))}
+            </select>
+            <FieldError message={errors.unidadePesoEmb} />
+          </div>
+        </div>
       </fieldset>
 
       {/* Dimensão do produto */}
@@ -365,51 +510,108 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
           </div>
 
           {values.incluirDimProduto ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <div className={fieldCol}>
-                <label htmlFor="pf-da" className={labelClass}>
-                  {t('modules.productsAdmin.fieldDimPAltura')}
-                </label>
-                <input
-                  id="pf-da"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  className={p('alturaP')}
-                  value={values.alturaP}
-                  onChange={(e) => onChange({ alturaP: e.target.value })}
-                />
-                <FieldError message={errors.alturaP} />
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <div className={fieldCol}>
+                  <label htmlFor="pf-da" className={labelClass}>
+                    {t('modules.productsAdmin.fieldDimPAltura')}
+                  </label>
+                  <input
+                    id="pf-da"
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    className={p('alturaP')}
+                    value={values.alturaP}
+                    onChange={(e) => onChange({ alturaP: e.target.value })}
+                  />
+                  <FieldError message={errors.alturaP} />
+                </div>
+                <div className={fieldCol}>
+                  <label htmlFor="pf-dl" className={labelClass}>
+                    {t('modules.productsAdmin.fieldDimPLargura')}
+                  </label>
+                  <input
+                    id="pf-dl"
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    className={p('larguraP')}
+                    value={values.larguraP}
+                    onChange={(e) => onChange({ larguraP: e.target.value })}
+                  />
+                  <FieldError message={errors.larguraP} />
+                </div>
+                <div className={fieldCol}>
+                  <label htmlFor="pf-dc" className={labelClass}>
+                    {t('modules.productsAdmin.fieldDimPComprimento')}
+                  </label>
+                  <input
+                    id="pf-dc"
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    className={p('comprimentoP')}
+                    value={values.comprimentoP}
+                    onChange={(e) => onChange({ comprimentoP: e.target.value })}
+                  />
+                  <FieldError message={errors.comprimentoP} />
+                </div>
+                <div className={fieldCol}>
+                  <label htmlFor="pf-dp" className={labelClass}>
+                    {t('modules.productsAdmin.fieldDimPPeso')}
+                  </label>
+                  <input
+                    id="pf-dp"
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    className={p('pesoP')}
+                    value={values.pesoP}
+                    onChange={(e) => onChange({ pesoP: e.target.value })}
+                  />
+                  <FieldError message={errors.pesoP} />
+                </div>
               </div>
-              <div className={fieldCol}>
-                <label htmlFor="pf-dl" className={labelClass}>
-                  {t('modules.productsAdmin.fieldDimPLargura')}
-                </label>
-                <input
-                  id="pf-dl"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  className={p('larguraP')}
-                  value={values.larguraP}
-                  onChange={(e) => onChange({ larguraP: e.target.value })}
-                />
-                <FieldError message={errors.larguraP} />
-              </div>
-              <div className={fieldCol}>
-                <label htmlFor="pf-dc" className={labelClass}>
-                  {t('modules.productsAdmin.fieldDimPComprimento')}
-                </label>
-                <input
-                  id="pf-dc"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  className={p('comprimentoP')}
-                  value={values.comprimentoP}
-                  onChange={(e) => onChange({ comprimentoP: e.target.value })}
-                />
-                <FieldError message={errors.comprimentoP} />
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div className={fieldCol}>
+                  <label htmlFor="pf-udp" className={labelClass}>
+                    {t('modules.productsAdmin.fieldUnidadeDimensaoProd')}
+                  </label>
+                  <select
+                    id="pf-udp"
+                    className={p('unidadeDimensaoP')}
+                    value={values.unidadeDimensaoP}
+                    disabled={disabled || opcoesCatalogoCarregando}
+                    onChange={(e) => onChange({ unidadeDimensaoP: e.target.value })}
+                  >
+                    {opcoesDimP.map((o) => (
+                      <option key={o.codigo} value={o.codigo}>
+                        {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError message={errors.unidadeDimensaoP} />
+                </div>
+                <div className={fieldCol}>
+                  <label htmlFor="pf-upp" className={labelClass}>
+                    {t('modules.productsAdmin.fieldUnidadePesoProd')}
+                  </label>
+                  <select
+                    id="pf-upp"
+                    className={p('unidadePesoP')}
+                    value={values.unidadePesoP}
+                    disabled={disabled || opcoesCatalogoCarregando}
+                    onChange={(e) => onChange({ unidadePesoP: e.target.value })}
+                  >
+                    {opcoesPesoProdSel.map((o) => (
+                      <option key={o.codigo} value={o.codigo}>
+                        {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError message={errors.unidadePesoP} />
+                </div>
               </div>
             </div>
           ) : null}

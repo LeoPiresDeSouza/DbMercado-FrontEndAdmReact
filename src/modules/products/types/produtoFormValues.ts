@@ -5,7 +5,9 @@ export interface ProdutoFormValues {
   marca: string;
   modelo: string;
   gtin: string;
-  unidadeMedida: string;
+  unidadeComercializacao: string;
+  unidadeMedidaFisica: string;
+  tipoEmbalagem: string;
   origemTipo: string;
   paisOrigem: string;
   ncm: string;
@@ -15,10 +17,15 @@ export interface ProdutoFormValues {
   larguraEmb: string;
   comprimentoEmb: string;
   pesoEmb: string;
+  unidadeDimensaoEmb: string;
+  unidadePesoEmb: string;
   incluirDimProduto: boolean;
   alturaP: string;
   larguraP: string;
   comprimentoP: string;
+  pesoP: string;
+  unidadeDimensaoP: string;
+  unidadePesoP: string;
   skus: Array<{ codigo: string; ativo: boolean }>;
 }
 
@@ -29,8 +36,10 @@ export function createEmptyProdutoFormValues(): ProdutoFormValues {
     marca: '',
     modelo: '',
     gtin: '',
-    unidadeMedida: 'UN',
-    origemTipo: 'NACIONAL',
+    unidadeComercializacao: 'UN',
+    unidadeMedidaFisica: 'UN',
+    tipoEmbalagem: 'CX',
+    origemTipo: '1',
     paisOrigem: '',
     ncm: '',
     cest: '',
@@ -39,10 +48,15 @@ export function createEmptyProdutoFormValues(): ProdutoFormValues {
     larguraEmb: '1',
     comprimentoEmb: '1',
     pesoEmb: '1',
+    unidadeDimensaoEmb: 'CM',
+    unidadePesoEmb: 'KG',
     incluirDimProduto: false,
     alturaP: '0',
     larguraP: '0',
     comprimentoP: '0',
+    pesoP: '1',
+    unidadeDimensaoP: 'CM',
+    unidadePesoP: 'KG',
     skus: [{ codigo: 'PADRAO', ativo: true }],
   };
 }

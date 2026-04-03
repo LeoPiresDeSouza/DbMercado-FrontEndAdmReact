@@ -7,7 +7,18 @@ import { useModulosUsuarioStore } from '../../../shared/stores/modulosUsuarioSto
 import { useNotificationCenterStore } from '../../../shared/stores/notificationCenterStore';
 import { resolveLocalizedErrorMessage } from '../../../shared/utils/resolveLocalizedErrorMessage';
 import ProdutoForm from '../components/ProdutoForm';
-import { atualizarProduto, obterProdutoPorId } from '../services/produtoService';
+import {
+  atualizarProduto,
+  listarOrigensGeograficasProduto,
+  listarTiposEmbalagemProduto,
+  listarUnidadesComercializacaoProduto,
+  listarUnidadesDimensaoProduto,
+  listarUnidadesMedidaProduto,
+  listarUnidadesPesoProduto,
+  obterProdutoPorId,
+  type ProdutoFormOpcoesCatalogo,
+  type ProdutoUnidadeMedidaOpcao,
+} from '../services/produtoService';
 import { createEmptyProdutoFormValues, type ProdutoFormValues } from '../types/produtoFormValues';
 import { produtoDetalheToFormValues, produtoFormValuesToUpsert } from '../utils/produtoFormMappers';
 import { validateProdutoForm } from '../utils/validateProdutoForm';
@@ -27,6 +38,16 @@ function ProdutoEditarPage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [opcoesCatalogo, setOpcoesCatalogo] = useState<ProdutoFormOpcoesCatalogo>({
+    comercializacao: [],
+    medidaFisica: [],
+    tipoEmbalagem: [],
+    dimensao: [],
+    peso: [],
+  });
+  const [opcoesCatalogoCarregando, setOpcoesCatalogoCarregando] = useState(false);
+  const [origensGeograficas, setOrigensGeograficas] = useState<ProdutoUnidadeMedidaOpcao[]>([]);
+  const [origensGeograficasCarregando, setOrigensGeograficasCarregando] = useState(false);
 
   const podeVer = modulos !== null && usuarioTemModuloProduto(modulos);
   const carregandoModulos = modulos === null;
@@ -59,6 +80,56 @@ function ProdutoEditarPage(): React.ReactElement {
       cancelled = true;
     };
   }, [id, idValid, podeVer, t]);
+
+  useEffect(() => {
+    if (!podeVer) {
+      return;
+    }
+    let cancelled = false;
+    setOpcoesCatalogoCarregando(true);
+    setOrigensGeograficasCarregando(true);
+    void Promise.all([
+      listarUnidadesComercializacaoProduto(),
+      listarUnidadesMedidaProduto(),
+      listarTiposEmbalagemProduto(),
+      listarUnidadesDimensaoProduto(),
+      listarUnidadesPesoProduto(),
+      listarOrigensGeograficasProduto(),
+    ])
+      .then(([com, fis, emb, dim, peso, origens]) => {
+        if (!cancelled) {
+          setOpcoesCatalogo({
+            comercializacao: com,
+            medidaFisica: fis,
+            tipoEmbalagem: emb,
+            dimensao: dim,
+            peso,
+          });
+          setOrigensGeograficas(origens);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOpcoesCatalogo({
+            comercializacao: [],
+            medidaFisica: [],
+            tipoEmbalagem: [],
+            dimensao: [],
+            peso: [],
+          });
+          setOrigensGeograficas([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setOpcoesCatalogoCarregando(false);
+          setOrigensGeograficasCarregando(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [podeVer]);
 
   const patch = useCallback((p: Partial<ProdutoFormValues>) => {
     setValues((s) => ({ ...s, ...p }));
@@ -188,7 +259,16 @@ function ProdutoEditarPage(): React.ReactElement {
             </div>
           </div>
 
-          <ProdutoForm values={values} onChange={patch} errors={errors} disabled={submitting} />
+          <ProdutoForm
+            values={values}
+            onChange={patch}
+            errors={errors}
+            disabled={submitting || loading}
+            opcoesCatalogo={opcoesCatalogo}
+            opcoesCatalogoCarregando={opcoesCatalogoCarregando}
+            origensGeograficasOpcoes={origensGeograficas}
+            origensGeograficasCarregando={origensGeograficasCarregando}
+          />
         </form>
       </div>
     </div>

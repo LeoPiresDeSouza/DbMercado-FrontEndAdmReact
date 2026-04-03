@@ -269,11 +269,14 @@ button {
   cursor: pointer;
 }
 
-/* Largura total da coluna principal: cancela o padding horizontal de .admin-content (guia: docs/ag-grid/index.html). */
+/*
+ * Largura da coluna do grid: bleed só à direita (cancela padding direito de .admin-content).
+ * Com painel de facetas à esquerda, margin-left negativo fazia o grid cobrir o aside e roubar cliques no toggle.
+ */
 .products-page-grid-bleed {
-  margin-left: calc(-1 * var(--admin-content-pad-x, 28px));
+  margin-left: 0;
   margin-right: calc(-1 * var(--admin-content-pad-x, 28px));
-  width: calc(100% + 2 * var(--admin-content-pad-x, 28px));
+  width: calc(100% + var(--admin-content-pad-x, 28px));
   min-width: 0;
   box-sizing: border-box;
 }

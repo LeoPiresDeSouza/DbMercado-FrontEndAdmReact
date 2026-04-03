@@ -7,9 +7,13 @@ import { usuarioTemModuloProduto } from '../../../shared/constants/produtoModulo
 import { useModulosUsuarioStore } from '../../../shared/stores/modulosUsuarioStore';
 import { useNotificationCenterStore } from '../../../shared/stores/notificationCenterStore';
 import { resolveLocalizedErrorMessage } from '../../../shared/utils/resolveLocalizedErrorMessage';
+import { CategoriaFacetPanel } from '../components/CategoriaFacetPanel';
+import { FiltrosAtivosChips } from '../components/FiltrosAtivosChips';
 import ProdutosGrid, { type ProdutosGridPageSizeOption } from '../components/ProdutosGrid';
+import { useCategoriaArvore, resolverCaminho } from '../hooks/useCategoriaArvore';
 import { ProdutoDeleteConfirmModal } from '../grid/ProdutoDeleteConfirmModal';
 import { excluirProduto, type ProdutoGridRow } from '../services/produtoService';
+import { FILTROS_ATIVOS_VAZIO, type CategoriaTreeNode } from '../types/categoriaTypes';
 
 function ProductsListPage(): React.ReactElement {
   const { t } = useTranslation('common');
@@ -20,11 +24,67 @@ function ProductsListPage(): React.ReactElement {
   const [gridPageSize, setGridPageSize] = useState<ProdutosGridPageSizeOption>(20);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [filtros, setFiltros] = useState(FILTROS_ATIVOS_VAZIO);
+  /**
+   * Leitura síncrona pelas requisições do SSRM: `refreshServerSide` dispara antes do React re-renderizar
+   * o grid, então o closure do datasource ainda teria `filtros` antigo sem esta ref.
+   */
+  const filtrosGridRef = useRef(FILTROS_ATIVOS_VAZIO);
+  filtrosGridRef.current = filtros;
+
+  const [painelFiltrosRecolhido, setPainelFiltrosRecolhido] = useState(true);
+  const { data: arvoreCategorias = [] } = useCategoriaArvore();
 
   const podeVerProdutos = modulos !== null && usuarioTemModuloProduto(modulos);
   const carregandoModulos = modulos === null;
 
   const refreshGrid = useCallback(() => {
+    gridApiRef.current?.refreshServerSide({ purge: true });
+  }, []);
+
+  const handleFiltroCategoria = useCallback(
+    (node: CategoriaTreeNode | null) => {
+      if (node == null) {
+        setFiltros((prev) => {
+          const next = {
+            ...prev,
+            categoriaId: null,
+            categoriaNome: null,
+            categoriaCaminho: [] as string[],
+          };
+          filtrosGridRef.current = next;
+          return next;
+        });
+      } else {
+        const caminho = resolverCaminho(arvoreCategorias, node.id);
+        setFiltros((prev) => {
+          const next = {
+            ...prev,
+            categoriaId: node.id,
+            categoriaNome: node.nome,
+            categoriaCaminho: caminho,
+          };
+          filtrosGridRef.current = next;
+          return next;
+        });
+      }
+      gridApiRef.current?.refreshServerSide({ purge: true });
+    },
+    [arvoreCategorias]
+  );
+
+  const handleFiltroOrigem = useCallback((origem: string | null) => {
+    setFiltros((prev) => {
+      const next = { ...prev, origem };
+      filtrosGridRef.current = next;
+      return next;
+    });
+    gridApiRef.current?.refreshServerSide({ purge: true });
+  }, []);
+
+  const handleLimparFiltros = useCallback(() => {
+    filtrosGridRef.current = FILTROS_ATIVOS_VAZIO;
+    setFiltros(FILTROS_ATIVOS_VAZIO);
     gridApiRef.current?.refreshServerSide({ purge: true });
   }, []);
 
@@ -114,8 +174,8 @@ function ProductsListPage(): React.ReactElement {
   }
 
   return (
-    <div className="flex w-full flex-col pb-8 pt-2">
-      <header className="mb-8 shrink-0" aria-label={t('modules.productsAdmin.title')}>
+    <div className="flex min-h-0 w-full flex-1 flex-col pb-8 pt-2">
+      <header className="mb-4 shrink-0 px-3 sm:px-4" aria-label={t('modules.productsAdmin.title')}>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-white">{t('modules.productsAdmin.toolbarGridTitle')}</h1>
@@ -168,17 +228,37 @@ function ProductsListPage(): React.ReactElement {
         </div>
       </header>
 
-      <section
-        className="products-page-grid-bleed flex w-full min-w-0 flex-col overflow-x-auto px-3 pb-2 pt-0 sm:px-4"
-        aria-label={t('modules.productsAdmin.gridAria')}
-      >
-        <ProdutosGrid
-          gridApiRef={gridApiRef}
-          pageSize={gridPageSize}
-          onDatasourceError={handleDatasourceError}
-          onPageSizeChange={setGridPageSize}
+      <div className="px-3 sm:px-4">
+        <FiltrosAtivosChips
+          filtros={filtros}
+          onRemoverCategoria={() => handleFiltroCategoria(null)}
+          onRemoverOrigem={() => handleFiltroOrigem(null)}
+          onLimparTodos={handleLimparFiltros}
         />
-      </section>
+      </div>
+
+      <div className="flex min-h-0 min-w-0 flex-1">
+        <CategoriaFacetPanel
+          filtros={filtros}
+          onFiltroCategoria={handleFiltroCategoria}
+          onFiltroOrigem={handleFiltroOrigem}
+          recolhido={painelFiltrosRecolhido}
+          onToggleRecolhido={() => setPainelFiltrosRecolhido((v) => !v)}
+        />
+        <section
+          className="products-page-grid-bleed flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto px-3 pb-2 pt-0 sm:px-4"
+          aria-label={t('modules.productsAdmin.gridAria')}
+        >
+          <ProdutosGrid
+            gridApiRef={gridApiRef}
+            pageSize={gridPageSize}
+            filtros={filtros}
+            filtrosConsultaRef={filtrosGridRef}
+            onDatasourceError={handleDatasourceError}
+            onPageSizeChange={setGridPageSize}
+          />
+        </section>
+      </div>
 
       <ProdutoDeleteConfirmModal
         open={bulkDeleteOpen}

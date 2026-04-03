@@ -96,6 +96,7 @@ const SSRM_COUNT_UNIDADE = PRODUTO_GRID_SSRM_COUNT_UNIDADE;
 export type ProdutoGridColDefLabels = {
   nome: string;
   marca: string;
+  categoria: string;
   unidade: string;
   acoes: string;
   countNome: string;
@@ -156,8 +157,23 @@ export function createProdutoGridColumnDefs(labels: ProdutoGridColDefLabels): Co
       enablePivot: false,
     },
     {
+      colId: 'categoriaNome',
+      field: 'categoriaNome',
+      headerName: labels.categoria,
+      width: 200,
+      minWidth: 160,
+      editable: false,
+      filter: false,
+      floatingFilter: false,
+      sortable: true,
+      valueFormatter: (p) => dash(p.value),
+      enableRowGroup: false,
+      enableValue: false,
+      enablePivot: false,
+    },
+    {
       colId: COL_UNIDADE,
-      field: 'unidadeMedida',
+      field: 'unidadeMedidaFisica',
       headerName: labels.unidade,
       width: 120,
       minWidth: 96,

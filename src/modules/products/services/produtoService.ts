@@ -9,7 +9,9 @@ import { readResponseJsonUnknown } from '../../../shared/utils/readJson';
 const produtoResumoSchema = z.object({
   id: z.coerce.number(),
   nome: z.string(),
-  unidadeMedida: z.string(),
+  unidadeComercializacao: z.string(),
+  unidadeMedidaFisica: z.string(),
+  tipoEmbalagem: z.string(),
   marca: z.string().nullable().optional(),
 });
 
@@ -20,8 +22,12 @@ const produtoGridRowSchema = z.object({
   groupKey: z.string().optional(),
   id: z.coerce.number().nullable().optional(),
   nome: z.string(),
-  unidadeMedida: z.string(),
+  unidadeComercializacao: z.string().optional().default(''),
+  unidadeMedidaFisica: z.string().optional().default(''),
+  tipoEmbalagem: z.string().optional().default(''),
   marca: z.string().nullable().optional(),
+  categoriaNome: z.string().nullable().optional(),
+  categoriaSlug: z.string().nullable().optional(),
   childCount: z.number().optional(),
 });
 
@@ -52,6 +58,10 @@ export interface ProdutoGridQueryBody {
   groupKeys?: string[];
   valueCols?: ProdutoGridColumnVo[];
   pivotMode?: boolean;
+  /** Painel de facetas: categoria e subárvore no servidor. Omitir ou null = sem filtro. */
+  categoriaIdFiltro?: number | null;
+  /** `NACIONAL` | `IMPORTADO` (API mapeia para códigos de origem). */
+  origemFiltro?: string | null;
 }
 
 const produtoSkuResponseSchema = z.object({
@@ -67,7 +77,9 @@ const produtoDetalheSchema = z.object({
   marca: z.string().nullable().optional(),
   modelo: z.string().nullable().optional(),
   gtin: z.string().nullable().optional(),
-  unidadeMedida: z.string(),
+  unidadeComercializacao: z.string(),
+  unidadeMedidaFisica: z.string(),
+  tipoEmbalagem: z.string(),
   origemGeograficaTipo: z.string(),
   origemGeograficaPais: z.string().nullable().optional(),
   dadosFiscais: z.object({
@@ -80,6 +92,9 @@ const produtoDetalheSchema = z.object({
       altura: z.coerce.number(),
       largura: z.coerce.number(),
       comprimento: z.coerce.number(),
+      peso: z.coerce.number(),
+      unidadeDimensao: z.string(),
+      unidadePeso: z.string(),
     })
     .nullable()
     .optional(),
@@ -88,6 +103,8 @@ const produtoDetalheSchema = z.object({
     largura: z.coerce.number(),
     comprimento: z.coerce.number(),
     peso: z.coerce.number(),
+    unidadeDimensao: z.string(),
+    unidadePeso: z.string(),
   }),
   skus: z.array(produtoSkuResponseSchema),
   atributos: z.array(z.object({ nome: z.string(), valor: z.string() })).optional().default([]),
@@ -102,13 +119,94 @@ export interface ProdutoUpsertPayload {
   marca?: string | null;
   modelo?: string | null;
   gtin?: string | null;
-  unidadeMedida: string;
+  unidadeComercializacao: string;
+  unidadeMedidaFisica: string;
+  tipoEmbalagem: string;
   origemGeografica: { tipo: string; paisOrigem?: string | null };
   dadosFiscais: { ncm: string; cest?: string | null; origem: string };
-  dimensaoProduto?: { altura: number; largura: number; comprimento: number } | null;
-  dimensaoEmbalagem: { altura: number; largura: number; comprimento: number; peso: number };
+  dimensaoProduto?: {
+    altura: number;
+    largura: number;
+    comprimento: number;
+    peso: number;
+    unidadeDimensao: string;
+    unidadePeso: string;
+  } | null;
+  dimensaoEmbalagem: {
+    altura: number;
+    largura: number;
+    comprimento: number;
+    peso: number;
+    unidadeDimensao: string;
+    unidadePeso: string;
+  };
   skus: Array<{ codigo: string; ativo: boolean }>;
   atributos?: Array<{ nome: string; valor: string }> | null;
+}
+
+const produtoUnidadeMedidaOpcaoSchema = z.object({
+  codigo: z.string(),
+  rotulo: z.string(),
+});
+
+const listaUnidadesMedidaSchema = z.array(produtoUnidadeMedidaOpcaoSchema);
+
+export type ProdutoUnidadeMedidaOpcao = z.infer<typeof produtoUnidadeMedidaOpcaoSchema>;
+
+/** Listas de parâmetros para os selects do formulário de produto. */
+export type ProdutoFormOpcoesCatalogo = {
+  comercializacao: ProdutoUnidadeMedidaOpcao[];
+  medidaFisica: ProdutoUnidadeMedidaOpcao[];
+  tipoEmbalagem: ProdutoUnidadeMedidaOpcao[];
+  dimensao: ProdutoUnidadeMedidaOpcao[];
+  peso: ProdutoUnidadeMedidaOpcao[];
+};
+
+async function listarParametroProdutoLista(path: string): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  const correlationId = generateCorrelationId();
+  const response = await adminDotnetApiClient.request(path, {
+    method: 'GET',
+    correlationId,
+  });
+  const raw = await readResponseJsonUnknown(response);
+  if (!response.ok) {
+    throw normalizeHttpError(response, 'dotnet', correlationId, raw);
+  }
+  return parseJsonWithSchema(listaUnidadesMedidaSchema, deepCamelCaseKeys(raw));
+}
+
+export async function listarUnidadesComercializacaoProduto(): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  return listarParametroProdutoLista('/api/produtos/parametros/unidades-comercializacao');
+}
+
+export async function listarUnidadesMedidaProduto(): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  return listarParametroProdutoLista('/api/produtos/parametros/unidades-medida');
+}
+
+export async function listarTiposEmbalagemProduto(): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  return listarParametroProdutoLista('/api/produtos/parametros/tipos-embalagem');
+}
+
+export async function listarUnidadesDimensaoProduto(): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  return listarParametroProdutoLista('/api/produtos/parametros/unidades-dimensao');
+}
+
+export async function listarUnidadesPesoProduto(): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  return listarParametroProdutoLista('/api/produtos/parametros/unidades-peso');
+}
+
+/** Mesmo formato de unidade de medida: código + rótulo vindos de `dbParametro` (origemGeografica). */
+export async function listarOrigensGeograficasProduto(): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  const correlationId = generateCorrelationId();
+  const response = await adminDotnetApiClient.request('/api/produtos/parametros/origens-geograficas', {
+    method: 'GET',
+    correlationId,
+  });
+  const raw = await readResponseJsonUnknown(response);
+  if (!response.ok) {
+    throw normalizeHttpError(response, 'dotnet', correlationId, raw);
+  }
+  return parseJsonWithSchema(listaUnidadesMedidaSchema, deepCamelCaseKeys(raw));
 }
 
 export async function listarProdutosResumo(): Promise<ProdutoResumo[]> {
@@ -136,6 +234,8 @@ export async function consultarProdutosGrid(
       groupKeys: body.groupKeys ?? [],
       valueCols: body.valueCols ?? [],
       pivotMode: body.pivotMode ?? false,
+      categoriaIdFiltro: body.categoriaIdFiltro ?? null,
+      origemFiltro: body.origemFiltro ?? null,
     }),
     correlationId,
   });

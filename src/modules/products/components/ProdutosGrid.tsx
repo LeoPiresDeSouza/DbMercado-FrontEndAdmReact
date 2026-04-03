@@ -39,6 +39,7 @@ import {
   type ProdutoGridColumnVo,
   type ProdutoGridRow,
 } from '../services/produtoService';
+import { FILTROS_ATIVOS_VAZIO, type ProdutoFiltrosAtivos } from '../types/categoriaTypes';
 import { ProdutosGridEmptyOverlay } from './ProdutosGridEmptyOverlay';
 
 /** Limite superior do bloco ao exibir “todos” (alinhado ao teto do servidor: 200 por requisição). */
@@ -109,6 +110,13 @@ export type ProdutosGridProps = {
   pageSize: ProdutosGridPageSizeOption;
   /** Sincroniza estado ao mudar o tamanho da página pelo seletor do rodapé do AG Grid. */
   onPageSizeChange?: (size: ProdutosGridPageSizeOption) => void;
+  /** Filtros do painel lateral (categoria + origem) enviados ao SSRM. */
+  filtros?: ProdutoFiltrosAtivos;
+  /**
+   * Snapshot síncrono dos filtros para o POST do grid (atualizado no `setState` antes de `refreshServerSide`).
+   * Opcional: sem ref, usa só `filtros` (pode ficar desatualizado num refresh imediato após mudar o painel).
+   */
+  filtrosConsultaRef?: React.RefObject<ProdutoFiltrosAtivos>;
 };
 
 /**
@@ -116,7 +124,15 @@ export type ProdutosGridProps = {
  * (só `.admin-content` rola). Modo “todos” mantém viewport interna com altura máxima.
  */
 function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
-  const { gridApiRef, onDatasourceError, className, pageSize, onPageSizeChange } = props;
+  const {
+    gridApiRef,
+    onDatasourceError,
+    className,
+    pageSize,
+    onPageSizeChange,
+    filtros = FILTROS_ATIVOS_VAZIO,
+    filtrosConsultaRef,
+  } = props;
   const { t } = useTranslation('common');
   const { onGridReady: onResponsiveGridReady, onFirstDataRendered } = useProdutoGridResponsiveLayout();
 
@@ -133,7 +149,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
   useEffect(() => {
     ssrmLoadedAfterSuccessRef.current = false;
     ssrmLastRowCountRef.current = null;
-  }, [pageSize]);
+  }, [pageSize, filtros]);
 
   const stopDragAdminScroll = useCallback(() => {
     dragAdminScrollCleanupRef.current?.();
@@ -202,6 +218,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
             const hasFilters = filterModel && Object.keys(filterModel).length > 0;
             const start = request.startRow ?? 0;
             const end = request.endRow ?? start + blockSize;
+            const f = filtrosConsultaRef?.current ?? filtros;
             const result = await consultarProdutosGrid({
               startRow: start,
               endRow: end,
@@ -211,6 +228,8 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
               groupKeys: request.groupKeys ?? [],
               valueCols: mapColumnVoList(request.valueCols ?? []),
               pivotMode: request.pivotMode ?? false,
+              categoriaIdFiltro: f.categoriaId,
+              origemFiltro: f.origem,
             });
             ssrmLastRowCountRef.current = result.rowCount;
             ssrmLoadedAfterSuccessRef.current = true;
@@ -228,7 +247,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
         })();
       },
     }),
-    [blockSize]
+    [blockSize, filtros, filtrosConsultaRef]
   );
 
   const columnDefs = useMemo(
@@ -236,7 +255,8 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
       createProdutoGridColumnDefs({
         nome: t('modules.productsAdmin.fieldNome'),
         marca: t('modules.productsAdmin.fieldMarca'),
-        unidade: t('modules.productsAdmin.fieldUnidade'),
+        categoria: t('modules.productsAdmin.fieldCategoria'),
+        unidade: t('modules.productsAdmin.fieldUnidadeMedidaFisicaGrid'),
         acoes: t('modules.productsAdmin.columnAcoes'),
         countNome: t('modules.productsAdmin.gridValueCountNome'),
         countMarca: t('modules.productsAdmin.gridValueCountMarca'),
