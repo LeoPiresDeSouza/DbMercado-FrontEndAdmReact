@@ -3,7 +3,7 @@
  * O Quartz/Enterprise v35 empacotam tema em @layer; regras em global.css/Tailwind
  * podem não vencer — este bloco garante padding e bordas no catálogo.
  */
-import { CATALOG_CHECKBOX_BORDER_RADIUS_PX } from './produtosQuartzTheme';
+import { CATALOG_CHECKBOX_BORDER_RADIUS_PX } from '../../../shared/agGrid/adminCatalogQuartzTheme';
 
 export const CATALOG_COLUMN_PANEL_HEAD_STYLE_ID = 'dbmercado-catalog-column-panel-css';
 

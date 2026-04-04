@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCategoriaArvore } from '../hooks/useCategoriaArvore';
 import type { CategoriaTreeNode, ProdutoFiltrosAtivos } from '../types/categoriaTypes';
 import { CategoriaTreeNodeItem } from './CategoriaTreeNode';
-import './productFacetNav.css';
+import '../../../shared/styles/productFacetNav.css';
 
 interface Props {
   filtros: ProdutoFiltrosAtivos;

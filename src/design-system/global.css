@@ -68,7 +68,8 @@ button {
  * que GANHAM da injeção — o centro da grelha fica claro e o painel lateral herda texto escuro ilegível.
  * Repomos no div real do tema (filho direto do host) as mesmas cores que `produtosQuartzTheme.ts` (especificidade > [class*=ag-theme-]).
  */
-#dbmercado-produtos-grid-host.produtos-grid-host--erp > div[class*='ag-theme-'] {
+#dbmercado-produtos-grid-host.produtos-grid-host--erp > div[class*='ag-theme-'],
+#dbmercado-logs-grid-host.produtos-grid-host--erp > div[class*='ag-theme-'] {
   --ag-background-color: #141b2d;
   --ag-foreground-color: #ffffff;
   --ag-data-color: var(--ag-foreground-color);
@@ -208,13 +209,15 @@ button {
  * “Valores” fica fora do sítio — sem zoom a zona de arraste não aparece. Fixar altura intrínseca das zonas
  * (grupos + valores) e dar `flex:1` + min-height:0 à lista para ela fazer scroll interno.
  */
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-drop-vertical {
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-drop-vertical,
+#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-drop-vertical {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   min-height: 76px !important;
 }
 
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select {
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select,
+#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select {
   flex: 1 1 0% !important;
   min-height: 0 !important;
 }
@@ -228,17 +231,30 @@ button {
 /*
  * Centralização vertical: o tema posiciona o conteúdo no topo se a célula não for flex.
  * Aplicamos flex na célula e no wrapper para cobrir variações de DOM (Quartz / Enterprise).
+ *
+ * `min-width: 0` + `overflow: hidden` nos flex items: sem isso, texto longo não encolhe e “vaza”
+ * visualmente sobre as colunas vizinhas (ellipsis do AG Grid não chega a aplicar).
  */
 .produtos-grid-host.produtos-grid-host--erp .ag-row > .ag-cell:not(.ag-cell-inline-editing) {
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .produtos-grid-host.produtos-grid-host--erp .ag-cell:not(.ag-cell-inline-editing) .ag-cell-wrapper {
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
   min-height: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-cell:not(.ag-cell-inline-editing) .ag-cell-value {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .produtos-grid-host.produtos-grid-host--erp .ag-paging-panel {
@@ -354,18 +370,20 @@ button {
 }
 
 /* --------------------------------------------------------------------------
-   Catálogo (#dbmercado-produtos-grid-host): painel Colunas vs CSS do Enterprise
+   Grids admin SSRM (produtos, logs): painel Colunas vs CSS do Enterprise
    O bundle injeta .ag-column-panel-column-select:nth-child(n+2){ border-top: ... }
    (linha entre pivot e pesquisa). Precisa !important + seletor forte; carrega por último.
    -------------------------------------------------------------------------- */
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select.ag-column-panel-column-select {
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select.ag-column-panel-column-select,
+#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select.ag-column-panel-column-select {
   border-top: 0 none transparent !important;
   border-top-width: 0 !important;
   border-bottom: none !important;
   padding-top: calc(var(--ag-grid-size, 7px) * 3) !important;
 }
 
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header {
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header,
+#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-select-header {
   border-bottom: none !important;
   padding-block: 6px 0 !important;
   min-height: unset !important;
@@ -373,7 +391,9 @@ button {
 }
 
 #dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-text-field-input,
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-input-field-input {
+#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-input-field-input,
+#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-text-field-input,
+#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-input-field-input {
   border-top: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
   border-left: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
   border-right: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;

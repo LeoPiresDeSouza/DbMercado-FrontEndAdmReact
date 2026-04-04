@@ -9,41 +9,56 @@ import {
 } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import type { AgGridReactProps } from 'ag-grid-react';
+import { adminCatalogQuartzTheme } from '../../agGrid/adminCatalogQuartzTheme';
 import { agGridLucideIcons } from '../../agGrid/agGridLucideIcons';
 import {
+  BASE_GRID_ADMIN_CATALOG_COL_DEF,
   BASE_GRID_DEFAULT_COL_DEF,
   BASE_GRID_DEFAULT_ROW_SELECTION,
   BASE_GRID_INFINITE_DEFAULTS,
 } from './baseGridDefaults';
 
-export type BaseGridProps<TData = unknown> = Omit<AgGridReactProps<TData>, 'modules' | 'theme' | 'onGridReady'> & {
-  /** Tema AG Grid (padrão: Quartz). Sobrescreva para customização via Theming API (`themeQuartz.withParams`). */
+/** `adminCatalog`: tema escuro ERP + colunas sem filtro de cabeçalho (produtos, logs, etc.). */
+export type BaseGridVariant = 'default' | 'adminCatalog';
+
+export type BaseGridProps<TData = unknown> = Omit<
+  AgGridReactProps<TData>,
+  'modules' | 'theme' | 'onGridReady'
+> & {
+  /** Identidade visual compartilhada dos grids SSRM administrativos. */
+  variant?: BaseGridVariant;
+  /** Tema AG Grid; com `variant="adminCatalog"` o padrão é {@link adminCatalogQuartzTheme}. */
   theme?: AgGridReactProps<TData>['theme'];
-  /** Mesclado por cima de {@link BASE_GRID_DEFAULT_COL_DEF}. */
+  /** Com `variant="adminCatalog"`, default `true` se omitido. */
+  loadThemeGoogleFonts?: boolean;
+  /** Com `variant="adminCatalog"`, default `() => document.head` no browser. */
+  themeStyleContainer?: AgGridReactProps<TData>['themeStyleContainer'];
+  /** Mesclado por cima dos defaults do `variant` e de {@link BASE_GRID_DEFAULT_COL_DEF}. */
   defaultColDef?: ColDef<TData>;
   /** Se informado, recebe a API quando o grid estiver pronto. */
   gridApiRef?: React.RefObject<GridApi<TData> | null>;
   onGridReady?: (event: GridReadyEvent<TData>) => void;
   /**
-   * Substitui a seleção padrão. Use `false` para não aplicar o preset de multiseleção
-   * (o AG Grid volta ao próprio default da versão em uso).
+   * Substitui a seleção padrão. Use `false` para não aplicar o preset de multiseleção.
+   * Com `variant="adminCatalog"` e omitido, não há seleção por linhas (grid só leitura até passar `rowSelection`).
    */
   rowSelection?: AgGridReactProps<TData>['rowSelection'] | false;
 };
 
 /**
- * Shell do AG Grid com módulos, tema, defaults de coluna, seleção e presets de infinite row model.
- * Usa {@link AllEnterpriseModule} (Community + Enterprise), alinhado aos exemplos oficiais (`sideBar`, tool panels).
- * Ícones internos padrão: {@link agGridLucideIcons} (Lucide); passe `icons` para sobrescrever chaves pontuais.
- * Sem regras de negócio: não define colunas, datasource nem chamadas HTTP.
+ * Shell do AG Grid com módulos, tema, defaults e variantes de identidade visual.
+ * Use `variant="adminCatalog"` para alinhar a produtos/logs (tema Quartz ERP + colunas catálogo).
  */
 function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElement {
   const {
+    variant = 'default',
     gridApiRef,
     onGridReady: userOnGridReady,
     defaultColDef: userDefaultColDef,
     rowSelection: rowSelectionProp,
     theme: themeProp,
+    loadThemeGoogleFonts: loadThemeGoogleFontsProp,
+    themeStyleContainer: themeStyleContainerProp,
     rowModelType,
     cacheBlockSize,
     maxBlocksInCache,
@@ -52,12 +67,15 @@ function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElem
     ...agGridProps
   } = props;
 
+  const isAdminCatalog = variant === 'adminCatalog';
+
   const mergedDefaultColDef = useMemo<ColDef<TData>>(
     () => ({
       ...(BASE_GRID_DEFAULT_COL_DEF as ColDef<TData>),
+      ...(isAdminCatalog ? (BASE_GRID_ADMIN_CATALOG_COL_DEF as ColDef<TData>) : {}),
       ...userDefaultColDef,
     }),
-    [userDefaultColDef]
+    [isAdminCatalog, userDefaultColDef]
   );
 
   const handleGridReady = useCallback(
@@ -70,8 +88,18 @@ function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElem
     [gridApiRef, userOnGridReady]
   );
 
-  const rowSelection =
-    rowSelectionProp === false ? undefined : (rowSelectionProp ?? BASE_GRID_DEFAULT_ROW_SELECTION);
+  const rowSelection = useMemo(() => {
+    if (rowSelectionProp === false) {
+      return undefined;
+    }
+    if (rowSelectionProp !== undefined) {
+      return rowSelectionProp;
+    }
+    if (isAdminCatalog) {
+      return undefined;
+    }
+    return BASE_GRID_DEFAULT_ROW_SELECTION;
+  }, [isAdminCatalog, rowSelectionProp]);
 
   const infinitePaginationProps =
     rowModelType === 'infinite'
@@ -83,7 +111,17 @@ function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElem
         }
       : {};
 
-  const theme = themeProp ?? themeQuartz;
+  const theme = themeProp ?? (isAdminCatalog ? adminCatalogQuartzTheme : themeQuartz);
+
+  const loadThemeGoogleFonts =
+    loadThemeGoogleFontsProp !== undefined ? loadThemeGoogleFontsProp : isAdminCatalog;
+
+  const themeStyleContainer =
+    themeStyleContainerProp !== undefined
+      ? themeStyleContainerProp
+      : isAdminCatalog && typeof document !== 'undefined'
+        ? () => document.head
+        : undefined;
 
   const mergedIcons = useMemo(
     () => (userIcons ? { ...agGridLucideIcons, ...userIcons } : agGridLucideIcons),
@@ -99,6 +137,8 @@ function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElem
       rowSelection={rowSelection}
       rowModelType={rowModelType}
       onGridReady={handleGridReady}
+      {...(loadThemeGoogleFonts ? { loadThemeGoogleFonts: true } : {})}
+      {...(themeStyleContainer ? { themeStyleContainer } : {})}
       {...infinitePaginationProps}
       {...agGridProps}
     />

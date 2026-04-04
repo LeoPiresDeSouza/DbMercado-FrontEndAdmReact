@@ -2,7 +2,7 @@ import React from 'react';
 import { ChevronRight, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ProdutoFiltrosAtivos } from '../types/categoriaTypes';
-import './productFacetNav.css';
+import '../../../shared/styles/productFacetNav.css';
 
 interface Props {
   filtros: ProdutoFiltrosAtivos;

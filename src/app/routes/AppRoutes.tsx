@@ -8,6 +8,10 @@ import UsersPage from '../../modules/users/pages/UsersPage';
 import RolesPage from '../../modules/roles/pages/RolesPage';
 import AuditPage from '../../modules/audit/pages/AuditPage';
 import ProductsListPage from '../../modules/products/pages/ProductsListPage';
+import LogsListPage from '../../modules/logs/pages/LogsListPage';
+import LogDetalhePage from '../../modules/logs/pages/LogDetalhePage';
+import JobExecucoesListPage from '../../modules/jobExecucoes/pages/JobExecucoesListPage';
+import JobExecucaoDetalhePage from '../../modules/jobExecucoes/pages/JobExecucaoDetalhePage';
 import ProdutoNovoPage from '../../modules/products/pages/ProdutoNovoPage';
 import ProdutoEditarPage from '../../modules/products/pages/ProdutoEditarPage';
 import OrdersPage from '../../modules/orders/pages/OrdersPage';
@@ -81,6 +85,10 @@ export function AppRoutes(): React.ReactElement {
         <Route path="users" element={<UsersPage />} />
         <Route path="roles" element={<RolesPage />} />
         <Route path="audit" element={<AuditPage />} />
+        <Route path="job-execucoes/:execucaoId" element={<JobExecucaoDetalhePage />} />
+        <Route path="job-execucoes" element={<JobExecucoesListPage />} />
+        <Route path="logs/:logId" element={<LogDetalhePage />} />
+        <Route path="logs" element={<LogsListPage />} />
         <Route path="produtos" element={<ProductsListPage />} />
         <Route path="produtos/novo" element={<ProdutoNovoPage />} />
         <Route path="produtos/:id" element={<ProdutoEditarPage />} />

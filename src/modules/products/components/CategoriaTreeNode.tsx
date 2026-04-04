@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { CategoriaTreeNode as TNode } from '../types/categoriaTypes';
-import './productFacetNav.css';
+import '../../../shared/styles/productFacetNav.css';
 
 const depthClass = (nivel: number): string => {
   const i = Math.min(Math.max(nivel, 0), 3);

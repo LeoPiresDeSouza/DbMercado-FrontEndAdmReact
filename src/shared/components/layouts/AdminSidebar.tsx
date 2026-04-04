@@ -2,6 +2,14 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { usuarioTemModuloProduto } from '../../constants/produtoModulo';
+import {
+  ControleLogsPermissao,
+  usuarioTemPermissaoControleLogs,
+} from '../../../modules/logs/utils/controleLogsPermissoes';
+import {
+  JobExecucoesPermissao,
+  usuarioTemPermissaoJobExecucoes,
+} from '../../../modules/jobExecucoes/utils/controleJobExecucoesPermissoes';
 import { useAppShellStore } from '../../stores/appShellStore';
 import { useModulosUsuarioStore } from '../../stores/modulosUsuarioStore';
 import './AdminSidebar.css';
@@ -17,6 +25,10 @@ function AdminSidebar(): React.ReactElement {
   const setMobileOpen = useAppShellStore((s) => s.setMobileSidebarOpen);
   const modulosUsuario = useModulosUsuarioStore((s) => s.modulos);
   const exibirMenuProdutos = modulosUsuario !== null && usuarioTemModuloProduto(modulosUsuario);
+  const exibirMenuLogs =
+    modulosUsuario !== null && usuarioTemPermissaoControleLogs(modulosUsuario, ControleLogsPermissao.acessar);
+  const exibirMenuJobExecucoes =
+    modulosUsuario !== null && usuarioTemPermissaoJobExecucoes(modulosUsuario, JobExecucoesPermissao.acessar);
 
   return (
     <aside
@@ -91,6 +103,28 @@ function AdminSidebar(): React.ReactElement {
         >
           <span className="admin-sidebar__link-text">{t('nav.audit')}</span>
         </NavLink>
+        {exibirMenuLogs ? (
+          <NavLink
+            to="/admin/logs"
+            className={navClass}
+            title={t('nav.logs')}
+            data-sidebar-glyph="◎"
+            onClick={() => setMobileOpen(false)}
+          >
+            <span className="admin-sidebar__link-text">{t('nav.logs')}</span>
+          </NavLink>
+        ) : null}
+        {exibirMenuJobExecucoes ? (
+          <NavLink
+            to="/admin/job-execucoes"
+            className={navClass}
+            title={t('nav.jobExecucoes')}
+            data-sidebar-glyph="⏱"
+            onClick={() => setMobileOpen(false)}
+          >
+            <span className="admin-sidebar__link-text">{t('nav.jobExecucoes')}</span>
+          </NavLink>
+        ) : null}
 
         <div className="admin-sidebar__section-label">{t('nav.sectionOps')}</div>
         {exibirMenuProdutos ? (

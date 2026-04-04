@@ -28,11 +28,7 @@ import {
   CATALOG_COLUMN_PANEL_HEAD_CSS,
   CATALOG_COLUMN_PANEL_HEAD_STYLE_ID,
 } from '../grid/catalogColumnPanelHeadStyles';
-import {
-  CATALOG_GRID_HEADER_PX,
-  CATALOG_SIDEBAR_PANEL_PX,
-  produtosCatalogoQuartzTheme,
-} from '../grid/produtosQuartzTheme';
+import { CATALOG_GRID_HEADER_PX, CATALOG_SIDEBAR_PANEL_PX } from '../grid/produtosQuartzTheme';
 import { useProdutoGridResponsiveLayout } from '../grid/useProdutoGridResponsiveLayout';
 import {
   consultarProdutosGrid,
@@ -479,10 +475,8 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
     >
       <BaseGrid<ProdutoGridRow>
         key={`produtos-grid-${pageSize}`}
+        variant="adminCatalog"
         className={catalogScrollMode ? 'w-full min-w-0' : 'h-full w-full min-w-0'}
-        theme={produtosCatalogoQuartzTheme}
-        loadThemeGoogleFonts
-        themeStyleContainer={typeof document !== 'undefined' ? () => document.head : undefined}
         noRowsOverlayComponent={ProdutosGridEmptyOverlay}
         sideBar={sideBar}
         gridApiRef={gridApiRef}
