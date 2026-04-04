@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { tryLoadModulosUsuario } from '../../../modules/auth/services/moduloUsuarioService';
 import { authService } from '../../../modules/auth/services/authService';
+import { performClientLogoutCleanup } from '../../auth/clientSessionCleanup';
 import { AdminNotificationToasts } from '../notifications/AdminNotificationToasts';
 import { useAppShellStore } from '../../stores/appShellStore';
+import { useAuthStore } from '../../stores/authStore';
 import { useModulosUsuarioStore } from '../../stores/modulosUsuarioStore';
 import { readIdentityFromAccessToken } from '../../utils/jwtPayload';
 import AdminSidebar from './AdminSidebar';
@@ -18,11 +20,13 @@ import './AdminLayout.css';
 function AdminLayout(): React.ReactElement {
   const { t } = useTranslation('common');
   const location = useLocation();
+  const navigate = useNavigate();
   const collapsed = useAppShellStore((s) => s.sidebarCollapsed);
   const mobileOpen = useAppShellStore((s) => s.mobileSidebarOpen);
   const toggleMobileSidebar = useAppShellStore((s) => s.toggleMobileSidebar);
   const setMobileOpen = useAppShellStore((s) => s.setMobileSidebarOpen);
   const setSidebarCollapsed = useAppShellStore((s) => s.setSidebarCollapsed);
+  const sessionRevision = useAuthStore((s) => s.sessionRevision);
 
   useEffect(() => {
     setSidebarCollapsed(true);
@@ -35,10 +39,7 @@ function AdminLayout(): React.ReactElement {
       useModulosUsuarioStore.getState().markLoadedEmpty();
       return;
     }
-    const { modulos, setModulos } = useModulosUsuarioStore.getState();
-    if (modulos !== null) {
-      return;
-    }
+    const { setModulos } = useModulosUsuarioStore.getState();
     let cancelled = false;
     void tryLoadModulosUsuario(identity)
       .then((list) => {
@@ -54,7 +55,30 @@ function AdminLayout(): React.ReactElement {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sessionRevision]);
+
+  /** Ao voltar à aba, revalida com o servidor (refresh revogado / expirado no back-end). */
+  useEffect(() => {
+    const onVisibility = (): void => {
+      if (document.visibilityState !== 'visible') {
+        return;
+      }
+      void (async () => {
+        if (!authService.isAuthenticated()) {
+          performClientLogoutCleanup();
+          navigate('/login', { replace: true });
+          return;
+        }
+        const ok = await authService.validateSessionWithServer();
+        if (!ok) {
+          performClientLogoutCleanup();
+          navigate('/login', { replace: true });
+        }
+      })();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [navigate]);
 
   return (
     <div className={`admin-shell${collapsed ? ' admin-shell--sidebar-collapsed' : ''}`}>

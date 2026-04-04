@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import PrivateRoute from '../../shared/components/guards/PrivateRoute';
 import AdminLayout from '../../shared/components/layouts/AdminLayout';
@@ -13,11 +13,49 @@ import ProdutoEditarPage from '../../modules/products/pages/ProdutoEditarPage';
 import OrdersPage from '../../modules/orders/pages/OrdersPage';
 import InventoryPage from '../../modules/inventory/pages/InventoryPage';
 import BillingPage from '../../modules/billing/pages/BillingPage';
+import { performClientLogoutCleanup } from '../../shared/auth/clientSessionCleanup';
 import { authService } from '../../modules/auth/services/authService';
 
 function HomeRedirect(): React.ReactElement {
-  const authed = authService.isAuthenticated();
-  return <Navigate to={authed ? '/admin/dashboard' : '/login'} replace />;
+  const [target, setTarget] = useState<'admin' | 'login' | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      if (!authService.isAuthenticated()) {
+        if (!cancelled) {
+          setTarget('login');
+        }
+        return;
+      }
+      const ok = await authService.validateSessionWithServer();
+      if (cancelled) {
+        return;
+      }
+      if (!ok) {
+        performClientLogoutCleanup();
+        setTarget('login');
+        return;
+      }
+      setTarget('admin');
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (target === null) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#0F1419',
+        }}
+      />
+    );
+  }
+
+  return <Navigate to={target === 'admin' ? '/admin/dashboard' : '/login'} replace />;
 }
 
 /**

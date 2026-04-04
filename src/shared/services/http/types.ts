@@ -1,7 +1,7 @@
 import type { ZodType } from 'zod';
 
 /** Identificador lógico do backend (telemetria, logs, erros). */
-export type HttpBackendId = 'dotnet' | 'python-ai';
+export type HttpBackendId = 'dotnet';
 
 export interface StructuredLogEvent {
   event: string;

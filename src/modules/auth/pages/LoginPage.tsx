@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../shared/i18n/constants';
 import { useAuthStore } from '../../../shared/stores/authStore';
+import { performClientLogoutCleanup } from '../../../shared/auth/clientSessionCleanup';
 import { resolveLocalizedErrorMessage } from '../../../shared/utils/resolveLocalizedErrorMessage';
 import { authService } from '../services/authService';
 import './LoginPage.css';
@@ -13,12 +14,33 @@ function LoginPage(): React.ReactElement {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionProbe, setSessionProbe] = useState<'idle' | 'checking' | 'done'>('idle');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (authService.isAuthenticated()) {
-      navigate('/admin/dashboard', { replace: true });
-    }
+    let cancelled = false;
+    setSessionProbe('checking');
+    void (async () => {
+      if (!authService.isAuthenticated()) {
+        if (!cancelled) {
+          setSessionProbe('done');
+        }
+        return;
+      }
+      const ok = await authService.validateSessionWithServer();
+      if (cancelled) {
+        return;
+      }
+      if (ok) {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        performClientLogoutCleanup();
+      }
+      setSessionProbe('done');
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -41,6 +63,18 @@ function LoginPage(): React.ReactElement {
       setLoading(false);
     }
   };
+
+  if (sessionProbe === 'checking') {
+    return (
+      <div className="login-page">
+        <div className="login-panel">
+          <p className="login-welcome" aria-live="polite">
+            Validando sessão…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="login-page">

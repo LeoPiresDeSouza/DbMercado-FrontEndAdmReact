@@ -33,6 +33,12 @@ export interface AuthServiceApi {
    * pede novo par de tokens antes do pedido HTTP (complementa o refresh reativo em 401).
    */
   ensureAccessTokenFreshIfNeeded: () => Promise<void>;
+  /**
+   * Confirma sessão com o servidor: access válido → true sem rede; access expirado e refresh
+   * ainda dentro da validade (relógio) → tenta POST /refresh; falha → false.
+   * Não limpa storage — o chamador deve invocar `performClientLogoutCleanup` se retornar false.
+   */
+  validateSessionWithServer: () => Promise<boolean>;
 }
 
 let refreshInFlight: Promise<string | null> | null = null;
@@ -164,6 +170,17 @@ export const authService: AuthServiceApi = {
     if (!isAccessStillValid() || accessExpiresWithin(margemRenovacaoMs)) {
       await authService.refreshAccessTokenFromApi();
     }
+  },
+
+  validateSessionWithServer: async (): Promise<boolean> => {
+    if (isAccessStillValid()) {
+      return true;
+    }
+    if (!isRefreshStillValid()) {
+      return false;
+    }
+    const token = await authService.refreshAccessTokenFromApi();
+    return Boolean(token);
   },
 };
 

@@ -2,3 +2,6 @@ node_modules
 dist
 build
 *.local
+
+# Worktrees / artefatos locais do Claude (não fazem parte do app)
+.claude/
