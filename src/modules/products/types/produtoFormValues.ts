@@ -27,6 +27,7 @@ export interface ProdutoFormValues {
   unidadeDimensaoP: string;
   unidadePesoP: string;
   skus: Array<{ codigo: string; ativo: boolean }>;
+  categoriaProdutoId: number | null;
 }
 
 export function createEmptyProdutoFormValues(): ProdutoFormValues {
@@ -58,5 +59,6 @@ export function createEmptyProdutoFormValues(): ProdutoFormValues {
     unidadeDimensaoP: 'CM',
     unidadePesoP: 'KG',
     skus: [{ codigo: 'PADRAO', ativo: true }],
+    categoriaProdutoId: null,
   };
 }

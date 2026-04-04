@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   ColDef,
@@ -145,10 +145,13 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
    */
   const ssrmLoadedAfterSuccessRef = useRef(false);
   const ssrmLastRowCountRef = useRef<number | null>(null);
+  /** Altura mínima do corpo + pointer-events no overlay só quando faz sentido (evita `min-height` com 1+ linhas). */
+  const [ssrmReportsEmpty, setSsrmReportsEmpty] = useState(false);
 
   useEffect(() => {
     ssrmLoadedAfterSuccessRef.current = false;
     ssrmLastRowCountRef.current = null;
+    setSsrmReportsEmpty(false);
   }, [pageSize, filtros]);
 
   const stopDragAdminScroll = useCallback(() => {
@@ -207,6 +210,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
       getRows: (params) => {
         if (!authService.isAuthenticated()) {
           ssrmLoadedAfterSuccessRef.current = false;
+          setSsrmReportsEmpty(false);
           params.fail();
           return;
         }
@@ -233,6 +237,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
             });
             ssrmLastRowCountRef.current = result.rowCount;
             ssrmLoadedAfterSuccessRef.current = true;
+            setSsrmReportsEmpty(result.rowCount === 0);
             params.success({ rowData: result.rows, rowCount: result.rowCount });
             requestAnimationFrame(() => {
               if (!params.api.isDestroyed()) {
@@ -242,6 +247,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
           } catch (error: unknown) {
             onDatasourceErrorRef.current?.(error);
             ssrmLoadedAfterSuccessRef.current = false;
+            setSsrmReportsEmpty(false);
             params.fail();
           }
         })();
@@ -468,7 +474,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
   return (
     <div
       id={PRODUTOS_GRID_HOST_ID}
-      className={`produtos-grid-host produtos-grid-host--erp w-full min-w-0 ${catalogScrollMode ? 'produtos-grid-host--catalog-scroll' : ''} ${className ?? ''}`}
+      className={`produtos-grid-host produtos-grid-host--erp w-full min-w-0 ${catalogScrollMode ? 'produtos-grid-host--catalog-scroll' : ''} ${ssrmReportsEmpty ? 'produtos-grid-host--ssrm-empty' : ''} ${className ?? ''}`}
       style={catalogScrollMode ? undefined : { height: allModeGridHostHeightPx() }}
     >
       <BaseGrid<ProdutoGridRow>

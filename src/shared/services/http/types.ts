@@ -26,6 +26,11 @@ export interface HttpTokenProvider {
   getAccessToken: () => string | null;
   /** Renova o access token; retorna o novo JWT ou null se falhar. */
   refreshAccessToken: () => Promise<string | null>;
+  /**
+   * Chamado antes do primeiro envio em rotas autenticadas (ex.: renovar access se estiver expirado
+   * ou a expirar em breve), para reduzir 401 evitáveis. Opcional.
+   */
+  prepareAuthenticatedRequest?: () => Promise<void>;
   /** Sessão inválida após 401 + refresh falho (ex.: redirect login). */
   onAuthFailure?: () => void;
 }

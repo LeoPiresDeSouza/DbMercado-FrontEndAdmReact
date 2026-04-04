@@ -28,6 +28,11 @@ export interface AuthServiceApi {
    * Usado pelo `ApiClient` enterprise; não usar `fetch` direto nos módulos para APIs autenticadas.
    */
   refreshAccessTokenFromApi: () => Promise<string | null>;
+  /**
+   * Se o refresh ainda for válido e o access estiver ausente, expirado ou a expirar em breve,
+   * pede novo par de tokens antes do pedido HTTP (complementa o refresh reativo em 401).
+   */
+  ensureAccessTokenFreshIfNeeded: () => Promise<void>;
 }
 
 let refreshInFlight: Promise<string | null> | null = null;
@@ -57,6 +62,19 @@ function isRefreshStillValid(): boolean {
   }
   const expMs = new Date(exp).getTime();
   return !Number.isNaN(expMs) && Date.now() < expMs;
+}
+
+/** True se a data de expiração do access existir e faltar menos de `bufferMs` ms. */
+function accessExpiresWithin(bufferMs: number): boolean {
+  const expiration = localStorage.getItem(STORAGE.accessExpiration);
+  if (!expiration) {
+    return true;
+  }
+  const expMs = new Date(expiration).getTime();
+  if (Number.isNaN(expMs)) {
+    return true;
+  }
+  return expMs - Date.now() < bufferMs;
 }
 
 async function postJson(path: string, body: unknown): Promise<Response> {
@@ -136,6 +154,16 @@ export const authService: AuthServiceApi = {
       });
     }
     return refreshInFlight;
+  },
+
+  ensureAccessTokenFreshIfNeeded: async (): Promise<void> => {
+    if (!isRefreshStillValid()) {
+      return;
+    }
+    const margemRenovacaoMs = 90_000;
+    if (!isAccessStillValid() || accessExpiresWithin(margemRenovacaoMs)) {
+      await authService.refreshAccessTokenFromApi();
+    }
   },
 };
 

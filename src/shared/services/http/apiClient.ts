@@ -173,6 +173,10 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
       const correlationId = init.correlationId ?? generateCorrelationId();
       const skipAuth = init.skipAuth ?? isPublicPath(path, config.publicPathPrefixes);
 
+      if (!skipAuth && config.tokenProvider?.prepareAuthenticatedRequest) {
+        await config.tokenProvider.prepareAuthenticatedRequest();
+      }
+
       let accessToken: string | null = null;
       if (!skipAuth && config.tokenProvider) {
         accessToken = config.tokenProvider.getAccessToken();

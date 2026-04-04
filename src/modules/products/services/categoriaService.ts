@@ -12,8 +12,14 @@ const categoriaTreeNodeSchema: z.ZodType<CategoriaTreeNode> = z.lazy(() =>
     id: z.coerce.number(),
     nome: z.string(),
     slug: z.string(),
-    descricao: z.string().nullable().optional(),
-    categoriaPaiId: z.coerce.number().nullable().optional(),
+    descricao: z.preprocess(
+      (x) => (x === undefined ? null : x),
+      z.union([z.string(), z.null()])
+    ),
+    categoriaPaiId: z.preprocess(
+      (x) => (x === undefined ? null : x),
+      z.union([z.coerce.number(), z.null()])
+    ),
     nivel: z.coerce.number(),
     ativo: z.boolean(),
     subcategorias: z.array(categoriaTreeNodeSchema),

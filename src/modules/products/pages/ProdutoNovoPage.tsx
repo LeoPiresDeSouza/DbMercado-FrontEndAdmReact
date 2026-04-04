@@ -10,6 +10,7 @@ import ProdutoForm from '../components/ProdutoForm';
 import {
   criarProduto,
   listarOrigensGeograficasProduto,
+  listarOrigensIcmsProduto,
   listarTiposEmbalagemProduto,
   listarUnidadesComercializacaoProduto,
   listarUnidadesDimensaoProduto,
@@ -21,6 +22,12 @@ import {
 import { createEmptyProdutoFormValues, type ProdutoFormValues } from '../types/produtoFormValues';
 import { produtoFormValuesToUpsert } from '../utils/produtoFormMappers';
 import { validateProdutoForm } from '../utils/validateProdutoForm';
+import { useMediaStore } from '../media/store/mediaStore';
+import {
+  montarPayloadAssociarMidias,
+  temMidiaAguardandoUpload,
+  temMidiaNaoPersistivelNaGrelha,
+} from '../media/services/midiaService';
 
 function ProdutoNovoPage(): React.ReactElement {
   const { t } = useTranslation('common');
@@ -41,12 +48,19 @@ function ProdutoNovoPage(): React.ReactElement {
   const [opcoesCatalogoCarregando, setOpcoesCatalogoCarregando] = useState(false);
   const [origensGeograficas, setOrigensGeograficas] = useState<ProdutoUnidadeMedidaOpcao[]>([]);
   const [origensGeograficasCarregando, setOrigensGeograficasCarregando] = useState(false);
+  const [origensIcms, setOrigensIcms] = useState<ProdutoUnidadeMedidaOpcao[]>([]);
+  const [origensIcmsCarregando, setOrigensIcmsCarregando] = useState(false);
 
   const podeVer = modulos !== null && usuarioTemModuloProduto(modulos);
   const carregandoModulos = modulos === null;
 
   const patch = useCallback((p: Partial<ProdutoFormValues>) => {
     setValues((s) => ({ ...s, ...p }));
+  }, []);
+
+  /** Garante estúdio de mídia vazio ao abrir «Novo produto» (o efeito do ProductMediaStudio já não limpa quando produtoId é null). */
+  useEffect(() => {
+    useMediaStore.getState().limparTudo();
   }, []);
 
   useEffect(() => {
@@ -56,6 +70,7 @@ function ProdutoNovoPage(): React.ReactElement {
     let cancelled = false;
     setOpcoesCatalogoCarregando(true);
     setOrigensGeograficasCarregando(true);
+    setOrigensIcmsCarregando(true);
     void Promise.all([
       listarUnidadesComercializacaoProduto(),
       listarUnidadesMedidaProduto(),
@@ -63,8 +78,9 @@ function ProdutoNovoPage(): React.ReactElement {
       listarUnidadesDimensaoProduto(),
       listarUnidadesPesoProduto(),
       listarOrigensGeograficasProduto(),
+      listarOrigensIcmsProduto(),
     ])
-      .then(([com, fis, emb, dim, peso, origens]) => {
+      .then(([com, fis, emb, dim, peso, origens, icms]) => {
         if (!cancelled) {
           setOpcoesCatalogo({
             comercializacao: com,
@@ -74,6 +90,7 @@ function ProdutoNovoPage(): React.ReactElement {
             peso,
           });
           setOrigensGeograficas(origens);
+          setOrigensIcms(icms);
         }
       })
       .catch(() => {
@@ -86,12 +103,14 @@ function ProdutoNovoPage(): React.ReactElement {
             peso: [],
           });
           setOrigensGeograficas([]);
+          setOrigensIcms([]);
         }
       })
       .finally(() => {
         if (!cancelled) {
           setOpcoesCatalogoCarregando(false);
           setOrigensGeograficasCarregando(false);
+          setOrigensIcmsCarregando(false);
         }
       });
     return () => {
@@ -107,14 +126,37 @@ function ProdutoNovoPage(): React.ReactElement {
       if (Object.keys(v).length > 0) {
         return;
       }
+      const midias = useMediaStore.getState().itens;
+      if (temMidiaAguardandoUpload(midias)) {
+        addNotification({
+          title: t('modules.productsAdmin.mediaUploadPendingTitle'),
+          body: t('modules.productsAdmin.mediaUploadPendingBody'),
+          severity: 'warning',
+        });
+        return;
+      }
+      if (temMidiaNaoPersistivelNaGrelha(midias)) {
+        addNotification({
+          title: t('modules.productsAdmin.mediaNotPersistedTitle'),
+          body: t('modules.productsAdmin.mediaNotPersistedBody'),
+          severity: 'warning',
+        });
+        return;
+      }
       setSubmitting(true);
       try {
-        await criarProduto(produtoFormValuesToUpsert(values));
+        const base = produtoFormValuesToUpsert(values);
+        const midiasPayload = montarPayloadAssociarMidias(useMediaStore.getState().itens);
+        await criarProduto({
+          ...base,
+          ...(midiasPayload.length > 0 ? { midias: midiasPayload } : {}),
+        });
         addNotification({
           title: t('modules.productsAdmin.createOkTitle'),
           body: t('modules.productsAdmin.createOkBody'),
           severity: 'success',
         });
+        useMediaStore.getState().limparTudo();
         navigate('/admin/produtos');
       } catch (error: unknown) {
         addNotification({
@@ -191,6 +233,9 @@ function ProdutoNovoPage(): React.ReactElement {
             opcoesCatalogoCarregando={opcoesCatalogoCarregando}
             origensGeograficasOpcoes={origensGeograficas}
             origensGeograficasCarregando={origensGeograficasCarregando}
+            origensIcmsOpcoes={origensIcms}
+            origensIcmsCarregando={origensIcmsCarregando}
+            produtoId={null}
           />
         </form>
       </div>

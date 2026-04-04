@@ -308,6 +308,23 @@ button {
   width: 100%;
 }
 
+/*
+ * Estado “sem linhas” (SSRM total = 0): com autoHeight o body pode ficar ~50px — recorta o overlay.
+ * Reativar cliques: .ag-overlay usa pointer-events:none; o wrapper oficial do no-rows não.
+ */
+.produtos-grid-host.produtos-grid-host--erp.produtos-grid-host--ssrm-empty .ag-center-cols-viewport,
+.produtos-grid-host.produtos-grid-host--erp.produtos-grid-host--ssrm-empty .ag-center-cols-container {
+  min-height: 300px;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .ag-overlay-no-rows-wrapper {
+  pointer-events: auto;
+}
+
+.produtos-grid-host.produtos-grid-host--erp .produtos-grid-empty-overlay {
+  pointer-events: auto;
+}
+
 /* Ícones Lucide injetados via gridOptions.icons (HTML estático); substituem máscaras do icon set do tema */
 .ag-lucide-root {
   display: inline-flex;

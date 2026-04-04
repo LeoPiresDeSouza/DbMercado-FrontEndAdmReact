@@ -1,10 +1,15 @@
 import { z } from 'zod';
 import { adminDotnetApiClient } from '../../../integrations/dotnet-api/adminDotnetApiClient';
 import { generateCorrelationId } from '../../../shared/services/http/correlationId';
-import { normalizeHttpError } from '../../../shared/services/http/normalizeError';
+import { buildErrorMessageFromBody, normalizeHttpError } from '../../../shared/services/http/normalizeError';
 import { deepCamelCaseKeys } from '../../../shared/utils/deepCamelCaseKeys';
 import { parseJsonWithSchema } from '../../../shared/utils/parseJson';
 import { readResponseJsonUnknown } from '../../../shared/utils/readJson';
+
+function mensagemFalhaApi(response: Response, raw: unknown): string {
+  const normalized = deepCamelCaseKeys(raw);
+  return buildErrorMessageFromBody(normalized) ?? `HTTP ${response.status}`;
+}
 
 const produtoResumoSchema = z.object({
   id: z.coerce.number(),
@@ -77,6 +82,7 @@ const produtoDetalheSchema = z.object({
   marca: z.string().nullable().optional(),
   modelo: z.string().nullable().optional(),
   gtin: z.string().nullable().optional(),
+  categoriaProdutoId: z.coerce.number().nullable().optional(),
   unidadeComercializacao: z.string(),
   unidadeMedidaFisica: z.string(),
   tipoEmbalagem: z.string(),
@@ -119,6 +125,7 @@ export interface ProdutoUpsertPayload {
   marca?: string | null;
   modelo?: string | null;
   gtin?: string | null;
+  categoriaProdutoId?: number | null;
   unidadeComercializacao: string;
   unidadeMedidaFisica: string;
   tipoEmbalagem: string;
@@ -142,6 +149,8 @@ export interface ProdutoUpsertPayload {
   };
   skus: Array<{ codigo: string; ativo: boolean }>;
   atributos?: Array<{ nome: string; valor: string }> | null;
+  /** Opcional: mídias já enviadas (POST /midia/upload) a associar ao gravar o produto. */
+  midias?: Array<{ midiaId: number; isPrincipal: boolean }>;
 }
 
 const produtoUnidadeMedidaOpcaoSchema = z.object({
@@ -209,6 +218,11 @@ export async function listarOrigensGeograficasProduto(): Promise<ProdutoUnidadeM
   return parseJsonWithSchema(listaUnidadesMedidaSchema, deepCamelCaseKeys(raw));
 }
 
+/** Opções de origem da mercadoria para ICMS (`dbParametro`: produto / origemIcms). */
+export async function listarOrigensIcmsProduto(): Promise<ProdutoUnidadeMedidaOpcao[]> {
+  return listarParametroProdutoLista('/api/produtos/parametros/origens-icms');
+}
+
 export async function listarProdutosResumo(): Promise<ProdutoResumo[]> {
   const correlationId = generateCorrelationId();
   const response = await adminDotnetApiClient.request('/api/produtos', { method: 'GET', correlationId });
@@ -263,9 +277,7 @@ export async function criarProduto(body: ProdutoUpsertPayload): Promise<number> 
   });
   const raw = await readResponseJsonUnknown(response);
   if (!response.ok) {
-    throw new Error(
-      typeof raw === 'object' && raw && 'message' in raw ? String((raw as { message?: string }).message) : `HTTP ${response.status}`
-    );
+    throw new Error(mensagemFalhaApi(response, raw));
   }
   if (typeof raw === 'number') {
     return raw;
@@ -287,9 +299,7 @@ export async function atualizarProduto(id: number, body: ProdutoUpsertPayload): 
   });
   if (!response.ok) {
     const raw = await readResponseJsonUnknown(response);
-    throw new Error(
-      typeof raw === 'object' && raw && 'message' in raw ? String((raw as { message?: string }).message) : `HTTP ${response.status}`
-    );
+    throw new Error(mensagemFalhaApi(response, raw));
   }
 }
 
@@ -297,8 +307,6 @@ export async function excluirProduto(id: number): Promise<void> {
   const response = await adminDotnetApiClient.request(`/api/produtos/${id}`, { method: 'DELETE' });
   if (!response.ok) {
     const raw = await readResponseJsonUnknown(response);
-    throw new Error(
-      typeof raw === 'object' && raw && 'message' in raw ? String((raw as { message?: string }).message) : `HTTP ${response.status}`
-    );
+    throw new Error(mensagemFalhaApi(response, raw));
   }
 }

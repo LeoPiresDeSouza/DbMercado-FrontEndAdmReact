@@ -1,289 +1,364 @@
 # DbMercado — Contexto do Projeto
 
-> Este arquivo é lido automaticamente pelo Claude Code / Cursor.  
-> Contém o contexto estratégico, arquitetural e de negócio do projeto.  
-> **Consulte-o antes de qualquer decisão de código.**
+> Arquivo lido automaticamente pelo Claude Code e pelo Cursor.
+> Última atualização: inspecionado ao vivo em 04/04/2026.
 
 ---
 
 ## 1. O que é o DbMercado
 
-Sistema de **gestão de estoque e fulfillment** para um intermediário que:
+Sistema de gestão de estoque e fulfillment. O intermediário:
+- Importa ou compra produtos no mercado interno
+- Armazena em Operadores Logísticos (3PLs)
+- Vende para Clientes que podem vender via marketplace do operador ou transferir estoque
 
-- Importa produtos do exterior **ou** compra no mercado interno
-- Armazena em **Operadores Logísticos** (3PLs) cadastrados
-- Vende os produtos para **Clientes**
-- Os clientes podem vender via **marketplace diretamente do operador logístico** (fulfillment) ou transferir os produtos para outro operador
-
-> O sistema **não controla o estoque do cliente** — apenas o estoque próprio nos operadores logísticos.
+O sistema NÃO controla estoque do cliente — apenas o estoque próprio nos operadores.
 
 ---
 
-## 2. Stack Tecnológica
+## 2. Stack
 
-### Frontend
-- **React** com TypeScript
-- **Tailwind CSS** para estilos
-- **AG Grid Enterprise** (SSRM — Server Side Row Model) para grids
-- **lucide-react** para ícones (exclusivamente)
-- **i18next** para internacionalização (pt-BR, en-US, zh-CN)
-- **SignalR** para realtime
-- **Vite** como bundler
-- **Poppins** como fonte principal (já carregada via Google Fonts)
+### Frontend (porta 3000)
+- React + TypeScript, Vite
+- Tailwind CSS
+- AG Grid Enterprise (SSRM)
+- TanStack Query + Zustand
+- lucide-react (ícones — exclusivo)
+- i18next (pt-BR, en-US, zh-CN)
+- SignalR (@microsoft/signalr)
+- Poppins (fonte — já carregada)
+- dnd-kit (drag-and-drop)
+- Uppy (@uppy/core, @uppy/xhr-upload) — modo headless
 
-### Backend (.NET)
-- **.NET Core 9.0** — API REST principal
-- **Entity Framework Core** com SQL Server
-- **Clean Architecture** em 4 camadas: Domain → Application → Infrastructure → Api
-- **JWT** para autenticação com refresh token
-- **CQRS leve** via Application layer
-
-### Backend IA (futuro)
-- **Python** — acesso a LLMs, OCR, enriquecimento de dados
-- Comunicação via HTTP com o .NET (adaptadores em `Infrastructure/Integracoes/Ia/`)
+### Backend (porta 5046)
+- .NET Core 9.0, Entity Framework Core, SQL Server
+- Clean Architecture: Domain → Application → Infrastructure → Api
+- JWT auth + refresh token
+- Quartz.NET para jobs agendados
+- SignalR para realtime
 
 ---
 
-## 3. Arquitetura do Backend
+## 3. Bounded Contexts
+
+| Contexto         | Status     |
+|------------------|------------|
+| Administracao    | ✅ Funcional — usuários, roles, permissões, JWT |
+| Produto          | ✅ Funcional — catálogo, SKUs, unidades, categoria |
+| Importacao       | ✅ Funcional — NF-e, itens, produtos importados |
+| Midia            | ✅ Funcional — upload imagem/vídeo, associação, limpeza |
+| CategoriaProduto | ✅ Funcional — árvore hierárquica 4 níveis |
+| Financeiro       | 🔲 Placeholder |
+| Logistica        | 🔲 Placeholder |
+| Marketplace      | 🔲 Placeholder |
+| Pedidos          | 🔲 Placeholder |
+
+---
+
+## 4. Endpoints disponíveis
 
 ```
-DbMercado.Domain          → Entidades, interfaces, Value Objects, exceções de negócio
-DbMercado.Application     → Casos de uso, DTOs, interfaces de serviço, mapeamentos
-DbMercado.Infrastructure  → Repositórios EF, jobs, providers, integrações externas
-DbMercado.Api             → Controllers, middlewares, DI, configuração
+Auth:     POST /api/Auth/login|logout|refresh|revoke
+
+Produtos:
+  GET/POST       /api/produtos
+  GET/PUT/DELETE /api/produtos/{id}
+  GET            /api/produtos/{id}/logistica
+  GET/POST       /api/produtos/{id}/midias
+  DELETE         /api/produtos/midia/{midiaId}
+  POST           /api/produtos/consultas/grid  (SSRM)
+  GET            /api/produtos/consultas/por-marca|por-ncm|por-origem|por-unidade-medida
+  GET            /api/produtos/parametros/origens-geograficas|origens-icms
+  GET            /api/produtos/parametros/tipos-embalagem
+  GET            /api/produtos/parametros/unidades-comercializacao|dimensao|medida|peso
+
+Categorias:
+  GET/POST       /api/categorias-produto
+  GET/PUT/DELETE /api/categorias-produto/{id}
+
+Importação:
+  GET/POST /api/importacao/notas-fiscais
+  GET/POST /api/importacao/produtos-importados
 ```
-
-### Bounded Contexts definidos
-
-| Contexto       | Status       | Descrição |
-|----------------|--------------|-----------|
-| Administracao  | ✅ Funcional | Usuários, roles, permissões, autenticação |
-| Produto        | ✅ Funcional | Catálogo de produtos com SKUs |
-| Importacao     | ✅ Funcional | NF-e, itens de NF, produtos importados |
-| Financeiro     | 🔲 Vazio     | Contas a pagar e receber |
-| Logistica      | 🔲 Vazio     | Operadores logísticos, movimentações |
-| Marketplace    | 🔲 Vazio     | Integração com marketplaces |
-| Pedidos        | 🔲 Vazio     | Pedidos de venda |
-
-### Regras arquiteturais do backend
-
-- **Entidades** têm setters privados — mutações via métodos de domínio
-- **Exceções de negócio** herdam de `BusinessException` (código + mensagem)
-- **Integrações externas** ficam em `Infrastructure/Integracoes/` — nunca em Domain
-- **Connection string** via `appsettings.json` ou User Secrets — nunca hardcoded
-- **Logs** persistidos na tabela `AppLog` via `DatabaseLoggerProvider`
-- **Respostas de erro** seguem `ProblemDetails` (RFC 7807)
-- **Migrations** sempre via `dotnet ef database update --project DbMercado.Infrastructure --startup-project DbMercado.Api`
 
 ---
 
-## 4. Arquitetura do Frontend
+## 5. Estrutura do Frontend
 
 ```
 src/
-├── app/              → Roteamento raiz, composição da aplicação
-├── design-system/    → Tokens CSS, global.css (NUNCA colocar regras de negócio aqui)
-├── modules/          → Feature folders por domínio (auth, products, orders, etc.)
-│   └── [módulo]/
-│       ├── components/   → Componentes do módulo
-│       ├── pages/        → Páginas roteáveis
-│       ├── services/     → Chamadas HTTP do módulo
-│       ├── types/        → Tipos e interfaces
-│       └── utils/        → Helpers específicos do módulo
-├── shared/           → Transversal: guards, layouts, componentes genéricos
-└── integrations/     → HTTP client, configuração de API
+├── app/routes/AppRoutes.tsx
+├── design-system/global.css + components/(Button|Modal|Toast)
+├── integrations/dotnet-api/ (adminDotnetApiClient, config BASE_URL=5046)
+│                realtime/   (SignalR AdminRealtimeProvider)
+├── modules/
+│   ├── auth/         ✅ LoginPage, authService
+│   ├── audit/        ✅ AuditPage
+│   ├── dashboard/    ✅ DashboardPage
+│   ├── users/        ✅ UsersPage
+│   ├── roles/        ✅ RolesPage
+│   ├── products/     ✅ Módulo completo (ver abaixo)
+│   ├── orders/       🔲 Placeholder
+│   ├── inventory/    🔲 Placeholder
+│   └── billing/      🔲 Placeholder
+└── shared/
+    ├── agGrid/       BaseGrid, agGridLocaleBR, agGridLucideIcons
+    ├── components/   layouts, guards, notifications, grid
+    ├── hooks/        useAdminGridQuery, useDashboardSummaryQuery
+    ├── i18n/         config + locales pt-BR
+    ├── query/        invalidateAdminCache, queryKeys
+    ├── services/http/ apiClient, retryWithBackoff, fetchWithTimeout
+    ├── stores/       authStore, permissionStore, appShellStore,
+    │                 modulosUsuarioStore, notificationCenterStore
+    └── utils/        deepCamelCaseKeys, jwtPayload, resolveLocalizedErrorMessage
 ```
 
-### Regras arquiteturais do frontend
-
-- **Cada módulo é autossuficiente** — não importar de outros módulos, apenas de `shared/`
-- **Design system** sempre consultado antes de criar estilos
-- **Tema escuro obrigatório** — `bg-white` e classes de tema claro são proibidas
-- **AG Grid** usa sempre SSRM para listas — nunca `clientSide` em produção
-- **Ícones** exclusivamente de `lucide-react`
-- **i18n** obrigatório — nunca texto hardcoded em português no JSX
-- **Formulários** sempre com sticky action bar quando tiverem mais de 3 seções
-
----
-
-## 5. Módulos do Frontend — Estado Atual
-
-| Módulo       | Status       | Observações |
-|--------------|--------------|-------------|
-| auth         | ✅ Funcional | Login JWT, guards de rota |
-| dashboard    | ✅ Funcional | KPIs, layout |
-| users        | ✅ Funcional | CRUD de usuários |
-| roles        | ✅ Funcional | CRUD de perfis/permissões |
-| audit        | ✅ Funcional | Timeline de auditoria |
-| products     | 🔧 Em desenvolvimento | Grid SSRM ok, formulário ok mas com inconsistência de tema (usa classes claro) |
-| orders       | 🔲 Placeholder | A implementar |
-| inventory    | 🔲 Placeholder | A implementar |
-| billing      | 🔲 Placeholder | A implementar |
-
----
-
-## 6. Design System — Resumo Rápido
-
-> Arquivo completo: `DESIGN_SYSTEM.md` na raiz do frontend
-
-**Paleta principal:**
-```
-Fundo:    #0F1419    Surface:  #141B2D    Borda:    #2D3748
-Accent:   #0D6EFD   Danger:   #DC3545    Success:  #198754
-Texto 1:  #FFFFFF    Texto 2:  #ADB5BD    Muted:    #718096
-```
-
-**Fonte:** Poppins (já carregada)  
-**Ícones:** lucide-react  
-**Raio padrão de cards:** `rounded-xl` (12px)  
-**Inputs:** sempre `h-10`, fundo `#141B2D`, borda `#2D3748`
-
----
-
-## 7. Roadmap de Desenvolvimento
-
-### Fase 1 — Base operacional (próxima)
-1. **Operadores Logísticos** — CRUD completo (backend + frontend)
-2. **Clientes** — CRUD com PJ/PF, vínculos com operadores
-3. **Estoque por Operador** — saldo, movimentações de entrada/saída
-
-### Fase 2 — Fluxo de entrada
-4. **Compras Mercado Interno** — pedido de compra → recebimento → estoque
-5. **Importação** — vincular `ProdutoImportado` ao estoque (domínio já tem base)
-
-### Fase 3 — Fluxo de saída
-6. **Pedidos de Venda** — cliente → produto → operador logístico
-7. **Logística** — transferência entre operadores
-8. **Marketplace** — integração para venda direta do operador
-
-### Fase 4 — Financeiro
-9. **Contas a Pagar** — compras, importações, frete
-10. **Contas a Receber** — vendas, repasse de marketplace
-
----
-
-## 8. Padrões de Código
-
-### Backend — Novo bounded context
-
-Ao criar um novo contexto (ex: Logistica), seguir esta estrutura:
+### Módulo products — arquivos atuais
 
 ```
-DbMercado.Domain/Logistica/
-  Entities/          → Entidades com setters privados
-  Interfaces/
-    Repositories/    → ILogisticaRepository
-    UnitsOfWork/     → ILogisticaUnitOfWork
-  Enums/             → Enums do contexto
-  ValueObjects/      → VOs imutáveis
+components/
+  CategoriaFacetPanel.tsx    painel lateral de filtros no grid
+  CategoriaTreeNode.tsx      nó da árvore
+  FiltrosAtivosChips.tsx     chips de filtros ativos
+  ProdutoForm.tsx            formulário criar/editar
+  ProdutosGrid.tsx           grid SSRM
+  ProdutosGridEmptyOverlay.tsx
+  productFacetNav.css
 
-DbMercado.Application/Logistica/
-  Services/          → Casos de uso
-  Dtos/              → Request/Response DTOs
-  Interfaces/        → ILogisticaService
-  Mapping/           → AutoMapper profiles
+constants/
+  origemGeografica.ts        ORIGEM_GEOGRAFICA_IMPORTADO
 
-DbMercado.Infrastructure/Logistica/
-  Repositories/      → Implementações EF
-  UnitsOfWork/
-  Persistence/
-    Mappings/        → EntityTypeConfiguration
+grid/
+  ProdutoAcoesCell.tsx
+  ProdutoDeleteConfirmModal.tsx
+  catalogColumnPanelHeadStyles.ts
+  produtoGridColDefs.ts
+  produtosQuartzTheme.ts
+  useProdutoGridResponsiveLayout.ts
 
-DbMercado.Api/Controllers/Logistica/
-  → Controller com [Authorize], verbos REST, ProblemDetails
-```
+hooks/
+  useCategoriaArvore.ts      exports: useCategoriaArvore, resolverCaminho
 
-### Frontend — Novo módulo
-
-Ao criar um novo módulo (ex: inventory), seguir:
-
-```
-src/modules/inventory/
-  components/        → Componentes do módulo
-  pages/
-    InventoryListPage.tsx    → grid SSRM
-    InventoryNovoPage.tsx    → formulário de criação
-    InventoryEditarPage.tsx  → formulário de edição
-  grid/
-    inventoryGridColDefs.ts
-    inventoryQuartzTheme.ts  → herdar do tema base
+media/                       Media Studio ✅
+  components/
+    MediaCard.tsx
+    MediaDropzone.tsx
+    MediaGrid.tsx
+    ProductMediaStudio.tsx
+  hooks/
+    useMediaDragDrop.ts      export: useMediaDragSensors
+    useMediaUploader.ts      Uppy headless
   services/
-    inventoryService.ts      → chamadas HTTP
-  types/
-    inventoryFormValues.ts
+    midiaService.ts          exports: uploadMidiaProduto, associarMidiasProduto,
+                             excluirMidiaProduto, listarMidiasProduto,
+                             montarPayloadAssociarMidias,
+                             temMidiaAguardandoUpload, temMidiaNaoPersistivelNaGrelha,
+                             urlMidiaAbsoluta
+  store/
+    mediaStore.ts            useMediaStore (Zustand)
+                             actions: adicionarItens, atualizarItem, removerItem,
+                             substituirItens, reordenar, definirPrincipal, limparTudo
   utils/
-    inventoryFormMappers.ts
-    validateInventoryForm.ts
+    gerarThumbnailVideo.ts   thumbnail no frame t=1
+
+pages/
+  ProductsListPage.tsx       grid + painel facetas + chips filtros
+  ProdutoEditarPage.tsx
+  ProdutoNovoPage.tsx
+
+services/
+  categoriaService.ts        listarArvoreCategoriasProduto
+  produtoService.ts          criarProduto, atualizarProduto, excluirProduto,
+                             obterProdutoPorId, consultarProdutosGrid,
+                             listarProdutosResumo, listarOrigensGeograficasProduto,
+                             listarOrigensIcmsProduto, listarTiposEmbalagemProduto,
+                             listarUnidadesComercializacaoProduto,
+                             listarUnidadesDimensaoProduto, listarUnidadesMedidaProduto,
+                             listarUnidadesPesoProduto
+
+types/
+  categoriaTypes.ts          FILTROS_ATIVOS_VAZIO
+  produtoFormValues.ts       createEmptyProdutoFormValues()
+                             campos: nome, descricao, marca, modelo, gtin,
+                             unidadeComercializacao, unidadeMedidaFisica, tipoEmbalagem,
+                             origemTipo, paisOrigem, ncm, cest, origemIcms,
+                             alturaEmb, larguraEmb, comprimentoEmb, pesoEmb,
+                             unidadeDimensaoEmb, unidadePesoEmb,
+                             incluirDimProduto, alturaP, larguraP, comprimentoP,
+                             pesoP, unidadeDimensaoP, unidadePesoP, skus
+                             ⚠️ PENDENTE: adicionar categoriaProdutoId
+
+utils/
+  fiscalDigitos.ts           somenteDigitosAscii
+  produtoFormMappers.ts      produtoDetalheToFormValues, produtoFormValuesToUpsert
+  produtoFormParse.ts        parseDecimalDoFormulario
+  validateProdutoForm.ts     validateProdutoForm
 ```
 
 ---
 
-## 9. Convenções de Nomenclatura
+## 6. DTOs do Backend (inspecionados ao vivo)
 
-### Backend
-- Entidades: `[Nome]Entity` (ex: `OperadorLogisticoEntity`)
-- DTOs: `[Nome]Dto`, `Criar[Nome]Request`, `[Nome]Response`
-- Repositórios: `I[Nome]Repository` (interface), `[Nome]Repository` (impl)
-- Controllers: `[Contexto]Controller`
-- Exceções: `BusinessException("CODIGO_ERRO", "Mensagem legível")`
+### ProdutoCreateDto / ProdutoUpdateDto
+```
+nome, descricao, marca, modelo, gtin, categoriaProdutoId,
+unidadeComercializacao, unidadeMedidaFisica, tipoEmbalagem,
+origemGeografica, dadosFiscais, dimensaoProduto, dimensaoEmbalagem,
+skus, atributos, midias
+```
+
+### ProdutoResponseDto
+```
+id, nome, descricao, marca, modelo, gtin,
+categoriaProdutoId, categoriaNome, categoriaSlug, categoriaCaminho,
+unidadeComercializacao, unidadeMedidaFisica, tipoEmbalagem,
+origemGeografica, dadosFiscais, dimensaoProduto, dimensaoEmbalagem,
+skus, atributos
+```
+NOTA: mídias NÃO retornam no ProdutoResponseDto — usar GET /api/produtos/{id}/midias
+
+### MidiaResponseDto
+```
+id, url, thumbnailUrl, tipo, ordem, isPrincipal, duracao, status
+```
+
+### ProdutoGridRowDto
+```
+isGroup, id, nome, unidadeComercializacao, unidadeMedidaFisica,
+tipoEmbalagem, marca, categoriaNome, categoriaSlug, childCount, groupKey
+```
+
+### ProdutoGridQueryDto
+```
+startRow, endRow, sortModel, filterModel,
+rowGroupCols, groupKeys, valueCols, pivotMode,
+categoriaIdFiltro, origemFiltro
+```
+
+---
+
+## 7. Design System — Obrigatório
+
+TEMA ESCURO ABSOLUTO. Nunca bg-white, bg-gray-*, text-gray-*.
+
+### Paleta
+```
+#0F1419  fundo global        #141B2D  surface cards
+#2D3748  borda               #1E293B  borda sutil
+#0D6EFD  accent              #DC3545  danger
+#198754  success             #FFC107  warning
+#FFFFFF  texto primário      #ADB5BD  texto secundário
+#718096  texto muted
+```
+
+### Fonte: Poppins (já carregada). Nunca Inter, Roboto ou Arial.
+### Ícones: lucide-react exclusivamente.
+
+### Padrão fieldset (seções do formulário de produto)
+```tsx
+<fieldset className="min-w-0 rounded-xl border border-[#2D3748] bg-[#141B2D] p-6 shadow-sm md:p-8">
+  <legend className="sr-only">Nome</legend>
+  <div className="flex w-full items-center gap-2 border-b border-orange-500/25
+                  pb-4 text-xs font-semibold uppercase tracking-widest text-orange-400 mb-6"
+       aria-hidden="true">
+    <Icone size={16} className="shrink-0" aria-hidden="true" />
+    Nome da Seção
+  </div>
+</fieldset>
+```
+ATENÇÃO: headers de seção usam text-orange-400 + border-orange-500/25
+
+---
+
+## 8. Rotas
+
+| Rota | Status |
+|------|--------|
+| /admin/dashboard | ✅ |
+| /admin/users | ✅ |
+| /admin/roles | ✅ |
+| /admin/audit | ✅ |
+| /admin/produtos | ✅ |
+| /admin/produtos/novo | ✅ |
+| /admin/produtos/:id | ✅ |
+| /admin/orders | 🔲 placeholder |
+| /admin/inventory | 🔲 placeholder |
+| /admin/billing | 🔲 placeholder |
+
+---
+
+## 9. Roadmap
+
+### Concluído ✅
+- Auth JWT + permissões + roles
+- CRUD usuários, roles, auditoria
+- Catálogo produtos completo (SKUs, 5 tipos de unidades separados)
+- Categorização hierárquica (4 níveis, auto-referenciada)
+- Grid produtos SSRM + agrupamento + filtros server-side
+- Painel facetas (categoria + origem) + chips filtros ativos
+- Media Studio (Uppy headless + dnd-kit + thumbnail vídeo t=1)
+- Jobs Quartz: LogCleanup + LimpezaMidiasTemporarias
+- IStorageService + LocalStorageService V1
+- Módulo Importação (NF-e)
+
+### Pendente imediato
+- [ ] Seletor categoria em cascata no ProdutoForm.tsx
+- [ ] Adicionar categoriaProdutoId em ProdutoFormValues + mapper
+
+### Próximas fases
+1. Operadores Logísticos + Clientes
+2. Estoque por Operador
+3. Compras Mercado Interno
+4. Pedidos de Venda + Logística
+5. Marketplace
+6. Financeiro
+
+---
+
+## 10. Regras — NÃO VIOLAR
 
 ### Frontend
-- Componentes: PascalCase (`ProdutoForm.tsx`)
-- Services: camelCase + sufixo Service (`produtoService.ts`)
-- Types: camelCase + sufixo adequado (`produtoFormValues.ts`)
-- Chaves i18n: `modules.[modulo].[chave]` (ex: `modules.productsAdmin.fieldNome`)
-
----
-
-## 10. Variáveis de Ambiente
-
-### Frontend
-```
-VITE_API_BASE_URL           → URL base da API .NET (padrão: http://localhost:5046)
-VITE_DOTNET_API_BASE_URL    → alias do acima
-```
+- Nunca bg-white ou tema claro
+- Nunca texto hardcoded em português no JSX (usar i18n)
+- Nunca importar de outro módulo (só de shared/)
+- Nunca AG Grid clientSide em produção
+- Nunca ícones além de lucide-react
+- Nunca dashboard nativo do Uppy
+- Nunca estado de mídia dentro do formulário (usar useMediaStore)
+- NÃO é Next.js — sem SSR, Server Actions
 
 ### Backend
-```
-ConnectionStrings:DefaultConnection  → SQL Server
-JwtSettings:SecretKey                → chave JWT (User Secrets em dev)
-JwtSettings:ExpirationHours          → tempo de expiração do token
-```
+- Nunca connection string hardcoded
+- Nunca lógica de negócio em Controllers
+- Nunca entidades com setters públicos
+- Nunca integrações externas no Domain
+- Nunca base64 para mídia
+- Nunca buffer binário no banco
+- Nunca nomenclatura em inglês (usar português)
 
 ---
 
-## 11. Comandos Úteis
+## 11. Configuração
 
+### Variáveis de ambiente (Frontend)
+```
+VITE_API_BASE_URL / VITE_DOTNET_API_BASE_URL = http://localhost:5046
+```
+
+### appsettings.json (Backend)
+```
+ConnectionStrings:DefaultConnection
+JwtSettings:SecretKey / ExpirationHours
+Storage:Local:Pasta = uploads/produtos
+Storage:Local:UrlBase = /uploads/produtos
+Quartz:LogCleanup:Enabled / CronSchedule / RetentionDays
+Quartz:LimpezaMidias:Enabled / CronSchedule / RetencaoHoras / TamanhoBatch
+```
+
+### Comandos
 ```bash
-# Backend — rodar
 dotnet run --project DbMercado.Api --launch-profile http
-
-# Backend — migrations
 dotnet ef migrations add [Nome] --project DbMercado.Infrastructure --startup-project DbMercado.Api
 dotnet ef database update --project DbMercado.Infrastructure --startup-project DbMercado.Api
-
-# Frontend — dev
-npm run dev
-
-# Frontend — build
-npm run build
+npm run dev   # porta 3000
 ```
-
----
-
-## 12. O que NÃO fazer
-
-### Backend
-- ❌ Connection string hardcoded
-- ❌ Lógica de negócio em Controllers
-- ❌ Entidades com setters públicos (exceto EF navigation props)
-- ❌ Integrações externas no Domain
-- ❌ Ignorar o middleware de exceções — sempre lançar `BusinessException`
-
-### Frontend
-- ❌ `bg-white` ou qualquer classe de tema claro
-- ❌ Texto hardcoded em português no JSX (usar i18n)
-- ❌ Importar de outro módulo (só de `shared/`)
-- ❌ AG Grid com `clientSide` em listas de produção
-- ❌ Ícones de outras bibliotecas além de `lucide-react`
-- ❌ Criar novo componente sem consultar o DESIGN_SYSTEM.md

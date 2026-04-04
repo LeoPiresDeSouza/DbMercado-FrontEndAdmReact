@@ -10,6 +10,7 @@ import { DOTNET_API_BASE_URL } from './config';
 const dotnetTokenProvider: HttpTokenProvider = {
   getAccessToken: () => authService.getAuthToken(),
   refreshAccessToken: () => authService.refreshAccessTokenFromApi(),
+  prepareAuthenticatedRequest: () => authService.ensureAccessTokenFreshIfNeeded(),
   onAuthFailure: () => {
     authService.logout();
     useAuthStore.getState().clearSession();

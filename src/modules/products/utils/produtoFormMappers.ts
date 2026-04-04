@@ -1,6 +1,7 @@
 import type { ProdutoDetalhe, ProdutoUpsertPayload } from '../services/produtoService';
 import type { ProdutoFormValues } from '../types/produtoFormValues';
 import { createEmptyProdutoFormValues } from '../types/produtoFormValues';
+import { somenteDigitosAscii } from './fiscalDigitos';
 
 export function produtoDetalheToFormValues(p: ProdutoDetalhe): ProdutoFormValues {
   const base = createEmptyProdutoFormValues();
@@ -33,6 +34,7 @@ export function produtoDetalheToFormValues(p: ProdutoDetalhe): ProdutoFormValues
     unidadeDimensaoP: p.dimensaoProduto?.unidadeDimensao ?? base.unidadeDimensaoP,
     unidadePesoP: p.dimensaoProduto?.unidadePeso ?? base.unidadePesoP,
     skus: p.skus.map((s) => ({ codigo: s.codigo, ativo: s.ativo })),
+    categoriaProdutoId: p.categoriaProdutoId ?? null,
   };
 }
 
@@ -55,6 +57,7 @@ export function produtoFormValuesToUpsert(v: ProdutoFormValues): ProdutoUpsertPa
     marca: v.marca.trim() || null,
     modelo: v.modelo.trim() || null,
     gtin: v.gtin.trim() || null,
+    categoriaProdutoId: v.categoriaProdutoId,
     unidadeComercializacao: v.unidadeComercializacao.trim(),
     unidadeMedidaFisica: v.unidadeMedidaFisica.trim(),
     tipoEmbalagem: v.tipoEmbalagem.trim(),
@@ -63,8 +66,11 @@ export function produtoFormValuesToUpsert(v: ProdutoFormValues): ProdutoUpsertPa
       paisOrigem: v.paisOrigem.trim() || null,
     },
     dadosFiscais: {
-      ncm: v.ncm.trim(),
-      cest: v.cest.trim() || null,
+      ncm: somenteDigitosAscii(v.ncm.trim()),
+      cest: (() => {
+        const d = somenteDigitosAscii(v.cest.trim());
+        return d.length > 0 ? d : null;
+      })(),
       origem: v.origemIcms.trim(),
     },
     dimensaoEmbalagem: emb,

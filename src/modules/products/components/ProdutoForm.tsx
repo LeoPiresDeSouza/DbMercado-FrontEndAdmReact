@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Key, Maximize2, Package, Plus, Ruler, Tag } from 'lucide-react';
+import { FolderTree, Key, Maximize2, Package, Plus, Ruler, Tag } from 'lucide-react';
 import type { ProdutoFormOpcoesCatalogo, ProdutoUnidadeMedidaOpcao } from '../services/produtoService';
 import type { ProdutoFormValues } from '../types/produtoFormValues';
+import { ProductMediaStudio } from '../media/components/ProductMediaStudio';
+import { CategoriaCascadeSelect } from './CategoriaCascadeSelect';
 
 const inputBase =
   'h-10 w-full rounded-md border px-3 py-2 text-sm text-white shadow-sm transition-colors placeholder:text-[#718096] focus:outline-none focus:ring-2 focus:ring-offset-0';
@@ -60,6 +62,20 @@ function opcoesSelectComValorAtual(
   return [...extra, ...opcoes];
 }
 
+/** Evita "0 — 0 — …" quando o valor do parâmetro já vem como "0 — descrição" (em dash, en-dash ou hífen). */
+function rotuloExibicaoOpcaoCatalogo(codigo: string, rotulo: string): string {
+  const c = codigo.trim();
+  const r = rotulo.trim();
+  if (!r || r === c) {
+    return c;
+  }
+  const esc = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (new RegExp(`^${esc}\\s*[\\u2014\\u2013\\-]\\s*`).test(r)) {
+    return r;
+  }
+  return `${c} — ${r}`;
+}
+
 export type ProdutoFormProps = {
   values: ProdutoFormValues;
   onChange: (patch: Partial<ProdutoFormValues>) => void;
@@ -70,6 +86,11 @@ export type ProdutoFormProps = {
   /** Opções vindas de `dbParametro` (produto / origemGeografica). */
   origensGeograficasOpcoes: ProdutoUnidadeMedidaOpcao[];
   origensGeograficasCarregando?: boolean;
+  /** Opções vindas de `dbParametro` (produto / origemIcms). */
+  origensIcmsOpcoes: ProdutoUnidadeMedidaOpcao[];
+  origensIcmsCarregando?: boolean;
+  /** Identificador do produto em edição; omitir ou `null` no cadastro novo (estúdio de mídia). */
+  produtoId?: number | null;
 };
 
 function FieldError({ message }: { message?: string }): React.ReactElement | null {
@@ -94,6 +115,9 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
     opcoesCatalogoCarregando,
     origensGeograficasOpcoes,
     origensGeograficasCarregando,
+    origensIcmsOpcoes,
+    origensIcmsCarregando,
+    produtoId = null,
   } = props;
   const { t } = useTranslation('common');
   const p = (name: keyof ProdutoFormValues) => (errors[name as string] ? inputError : inputNormal);
@@ -127,6 +151,10 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
   const opcoesPesoProdSel = useMemo(
     () => opcoesSelectComValorAtual(opcoesPeso, values.unidadePesoP),
     [opcoesPeso, values.unidadePesoP]
+  );
+  const opcoesOrigemIcms = useMemo(
+    () => opcoesSelectComValorAtual(origensIcmsOpcoes, values.origemIcms),
+    [origensIcmsOpcoes, values.origemIcms]
   );
 
   const setSku = (index: number, patch: Partial<{ codigo: string; ativo: boolean }>) => {
@@ -239,7 +267,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                 >
                   {opcoesCom.map((o) => (
                     <option key={o.codigo} value={o.codigo}>
-                      {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                      {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
                     </option>
                   ))}
                 </select>
@@ -258,7 +286,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                 >
                   {opcoesFis.map((o) => (
                     <option key={o.codigo} value={o.codigo}>
-                      {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                      {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
                     </option>
                   ))}
                 </select>
@@ -277,7 +305,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                 >
                   {opcoesEmbTipo.map((o) => (
                     <option key={o.codigo} value={o.codigo}>
-                      {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                      {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
                     </option>
                   ))}
                 </select>
@@ -285,6 +313,21 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
               </div>
             </div>
           </div>
+        </div>
+      </fieldset>
+
+      {/* Categorização */}
+      <fieldset disabled={disabled} className={cnFieldset(sectionFieldset)}>
+        <SectionLegend icon={FolderTree}>
+          {t('modules.productsAdmin.sectionCategorizacao')}
+        </SectionLegend>
+        <div className={sectionBodyStack}>
+          <CategoriaCascadeSelect
+            value={values.categoriaProdutoId}
+            onChange={(id) => onChange({ categoriaProdutoId: id })}
+            erro={errors.categoriaProdutoId}
+            disabled={disabled}
+          />
         </div>
       </fieldset>
 
@@ -367,14 +410,19 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                 <label htmlFor="pf-icms" className={labelClass}>
                   {t('modules.productsAdmin.fieldOrigemIcms')}
                 </label>
-                <input
+                <select
                   id="pf-icms"
-                  type="text"
-                  autoComplete="off"
                   className={p('origemIcms')}
                   value={values.origemIcms}
+                  disabled={disabled || origensIcmsCarregando}
                   onChange={(e) => onChange({ origemIcms: e.target.value })}
-                />
+                >
+                  {opcoesOrigemIcms.map((o) => (
+                    <option key={o.codigo} value={o.codigo}>
+                      {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
+                    </option>
+                  ))}
+                </select>
                 <FieldError message={errors.origemIcms} />
               </div>
             </div>
@@ -461,7 +509,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
             >
               {opcoesDimEmb.map((o) => (
                 <option key={o.codigo} value={o.codigo}>
-                  {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                  {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
                 </option>
               ))}
             </select>
@@ -480,7 +528,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
             >
               {opcoesPesoEmbSel.map((o) => (
                 <option key={o.codigo} value={o.codigo}>
-                  {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                  {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
                 </option>
               ))}
             </select>
@@ -587,7 +635,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                   >
                     {opcoesDimP.map((o) => (
                       <option key={o.codigo} value={o.codigo}>
-                        {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                        {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
                       </option>
                     ))}
                   </select>
@@ -606,7 +654,7 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
                   >
                     {opcoesPesoProdSel.map((o) => (
                       <option key={o.codigo} value={o.codigo}>
-                        {o.rotulo !== o.codigo ? `${o.codigo} — ${o.rotulo}` : o.codigo}
+                        {rotuloExibicaoOpcaoCatalogo(o.codigo, o.rotulo)}
                       </option>
                     ))}
                   </select>
@@ -696,6 +744,8 @@ function ProdutoForm(props: ProdutoFormProps): React.ReactElement {
           </button>
         </div>
       </fieldset>
+
+      <ProductMediaStudio produtoId={produtoId ?? null} disabled={disabled} />
     </div>
   );
 }
