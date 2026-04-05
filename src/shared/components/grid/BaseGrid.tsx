@@ -46,8 +46,10 @@ export type BaseGridProps<TData = unknown> = Omit<
 };
 
 /**
- * Shell do AG Grid com módulos, tema, defaults e variantes de identidade visual.
- * Use `variant="adminCatalog"` para alinhar a produtos/logs (tema Quartz ERP + colunas catálogo).
+ * Shell obrigatório do AG Grid no admin DbMercado.
+ * Todas as listagens tabulares do painel devem usar este componente (não instanciar {@link AgGridReact} nas páginas).
+ * Use `variant="adminCatalog"` para o mesmo tema Quartz ERP que produtos, logs e execução de jobs.
+ * Ver `DESIGN_SYSTEM.md` §10 e `CLAUDE.md` §7 — referência: ProdutosGrid, LogsGrid, JobExecucoesGrid.
  */
 function BaseGrid<TData = unknown>(props: BaseGridProps<TData>): React.ReactElement {
   const {

@@ -297,7 +297,7 @@ export function LogsGrid(props: LogsGridProps): React.ReactElement {
   return (
     <div
       id={LOGS_GRID_HOST_ID}
-      className="produtos-grid-host produtos-grid-host--erp produtos-grid-host--catalog-scroll w-full min-w-0"
+      className="produtos-grid-host produtos-grid-host--erp admin-ssrm-grid-host produtos-grid-host--catalog-scroll w-full min-w-0"
     >
       <BaseGrid<AppLogGridRow>
         key={`logs-grid-${pageSize}`}

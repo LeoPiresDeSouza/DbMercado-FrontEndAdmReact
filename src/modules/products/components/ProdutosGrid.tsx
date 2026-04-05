@@ -470,7 +470,7 @@ function ProdutosGrid(props: ProdutosGridProps): React.ReactElement {
   return (
     <div
       id={PRODUTOS_GRID_HOST_ID}
-      className={`produtos-grid-host produtos-grid-host--erp w-full min-w-0 ${catalogScrollMode ? 'produtos-grid-host--catalog-scroll' : ''} ${ssrmReportsEmpty ? 'produtos-grid-host--ssrm-empty' : ''} ${className ?? ''}`}
+      className={`produtos-grid-host produtos-grid-host--erp admin-ssrm-grid-host w-full min-w-0 ${catalogScrollMode ? 'produtos-grid-host--catalog-scroll' : ''} ${ssrmReportsEmpty ? 'produtos-grid-host--ssrm-empty' : ''} ${className ?? ''}`}
       style={catalogScrollMode ? undefined : { height: allModeGridHostHeightPx() }}
     >
       <BaseGrid<ProdutoGridRow>

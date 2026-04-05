@@ -303,6 +303,37 @@ import { Package, Tag, Ruler, DollarSign, Plus, Pencil, Trash2,
 
 ## 10. AG Grid — Tema Dark
 
+### BaseGrid — shell obrigatório (admin)
+
+**Sim: existe um componente base.** Todo grid de listagem no painel administrativo deve passar por `BaseGrid` (`src/shared/components/grid/BaseGrid.tsx`), exportado também em `src/shared/components/grid/index.ts`. **Não monte `AgGridReact` diretamente** em páginas de módulo (evita tema, ícones Lucide, defaults e variantes divergirem).
+
+| Regra | Detalhe |
+|--------|---------|
+| Variante ERP | `variant="adminCatalog"` — Quartz escuro alinhado a produtos e logs (`adminCatalogQuartzTheme`). |
+| Host | Wrapper com `produtos-grid-host produtos-grid-host--erp admin-ssrm-grid-host` (+ `produtos-grid-host--catalog-scroll` quando `domLayout: autoHeight`). A classe **`admin-ssrm-grid-host`** liga os overrides de tema escuro em `design-system/global.css` (AG Grid v35+); sem ela o grid cai no fundo branco padrão da folha `ag-grid.css`. |
+| Alturas | `rowHeight={44}`, `headerHeight={CATALOG_GRID_HEADER_PX}` de `shared/agGrid/adminCatalogQuartzTheme`. |
+| Colunas | `autoSizeStrategy={BASE_GRID_ADMIN_CATALOG_AUTOSIZE_STRATEGY}`; `defaultColDef` só por cima dos merges do `BaseGrid`. |
+| SSRM | `rowModelType="serverSide"` + datasource; paginação alinhada ao catálogo quando fizer sentido. |
+
+**Referência de implementação:** comparar `modules/products/components/ProdutosGrid.tsx`, `modules/logs/components/LogsGrid.tsx` e `modules/jobExecucoes/components/JobExecucoesGrid.tsx`. Novos grids devem copiar esse conjunto de props/tokens antes de especializar colunas e datasource.
+
+### Checklist obrigatória — novo grid admin SSRM (PR / code review)
+
+Use esta lista na ordem; **não pule itens**. Falhas comuns: esquecer `admin-ssrm-grid-host` (grid fica **branco**) ou montar `AgGridReact` fora do `BaseGrid`.
+
+1. [ ] Componente de lista usa **`BaseGrid`** de `src/shared/components/grid` (nunca `AgGridReact` direto na página).
+2. [ ] Prop **`variant="adminCatalog"`**.
+3. [ ] O `div` que envolve o `BaseGrid` inclui **obrigatoriamente** as classes:  
+   `produtos-grid-host produtos-grid-host--erp admin-ssrm-grid-host`  
+   (e `produtos-grid-host--catalog-scroll` quando `domLayout="autoHeight"`).
+4. [ ] `rowHeight={44}`, `headerHeight={CATALOG_GRID_HEADER_PX}`, `autoSizeStrategy={BASE_GRID_ADMIN_CATALOG_AUTOSIZE_STRATEGY}` (import de `adminCatalogQuartzTheme` / `grid/index`).
+5. [ ] `rowModelType="serverSide"` + datasource; locale de paginação alinhado ao catálogo (chaves `modules.productsAdmin.agPagination*` no i18n, se reutilizar os mesmos rótulos).
+6. [ ] Revisão visual: fundo da área do grid **#141B2D**, cabeçalho escuro — se aparecer branco, o passo 3 foi omitido ou o wrapper não é pai direto do tema.
+
+**Manutenção de CSS:** os tokens que corrigem o fundo branco do AG Grid v35+ estão em `src/design-system/global.css` sob o seletor **`.admin-ssrm-grid-host.produtos-grid-host--erp`**. Novos grids **não** precisam de novo bloco CSS desde que o host carregue essas classes. Só altere `global.css` se o próprio padrão ERP mudar (aí um único lugar atualiza todos os grids).
+
+---
+
 O tema do grid já usa o Quartz com acento `#0091FF`. Para consistência com o tema escuro, ao evoluir o tema:
 
 ```ts

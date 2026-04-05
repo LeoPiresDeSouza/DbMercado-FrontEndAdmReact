@@ -268,6 +268,14 @@ TEMA ESCURO ABSOLUTO. Nunca bg-white, bg-gray-*, text-gray-*.
 ```
 ATENÇÃO: headers de seção usam text-orange-400 + border-orange-500/25
 
+### Grids administrativos (AG Grid)
+
+- **Componente único:** `BaseGrid` em `src/shared/components/grid` — é o “base grid” da ferramenta; não usar `AgGridReact` solto nas telas admin.
+- **Visual ERP:** `variant="adminCatalog"` + wrapper com **`admin-ssrm-grid-host`** (obrigatório: aplica variáveis escuras em `global.css`; sem isso o AG Grid fica branco) + `produtos-grid-host produtos-grid-host--erp` e `produtos-grid-host--catalog-scroll` quando usar `autoHeight` + tokens `CATALOG_GRID_HEADER_PX`, `BASE_GRID_ADMIN_CATALOG_AUTOSIZE_STRATEGY`.
+- **Padrão para PR / revisão:** seguir a **checklist numerada** em `DESIGN_SYSTEM.md` §10 (“Checklist obrigatória — novo grid admin SSRM”); pode ser colada na descrição do PR ao adicionar um grid novo.
+- **Referências:** `ProdutosGrid.tsx`, `LogsGrid.tsx`, `JobExecucoesGrid.tsx`. Qualquer nova lista tabular deve alinhar a esses três antes de merge.
+- **Documentação expandida:** `DESIGN_SYSTEM.md` §10 — regras + checklist + nota de manutenção do `global.css`.
+
 ---
 
 ## 8. Rotas
@@ -322,6 +330,8 @@ ATENÇÃO: headers de seção usam text-orange-400 + border-orange-500/25
 - Nunca texto hardcoded em português no JSX (usar i18n)
 - Nunca importar de outro módulo (só de shared/)
 - Nunca AG Grid clientSide em produção
+- Grids administrativos: sempre `BaseGrid` com `variant="adminCatalog"` **e** wrapper com `admin-ssrm-grid-host` + `produtos-grid-host produtos-grid-host--erp` (checklist em `DESIGN_SYSTEM.md` §10; sem `admin-ssrm-grid-host` o grid fica branco)
+- Nunca `AgGridReact` direto nas páginas admin para listagens SSRM
 - Nunca ícones além de lucide-react
 - Nunca dashboard nativo do Uppy
 - Nunca estado de mídia dentro do formulário (usar useMediaStore)

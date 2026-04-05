@@ -66,10 +66,10 @@ button {
  * Theming API (AG Grid v35): variáveis injetadas em :where(.ag-theme-params-*) têm especificidade 0.
  * ag-grid.css aplica [class*=ag-theme-] com defaults claros (--ag-background-color: #fff, foreground #000),
  * que GANHAM da injeção — o centro da grelha fica claro e o painel lateral herda texto escuro ilegível.
- * Repomos no div real do tema (filho direto do host) as mesmas cores que `produtosQuartzTheme.ts` (especificidade > [class*=ag-theme-]).
+ * Repomos no div real do tema (filho direto do host) as mesmas cores que `adminCatalogQuartzTheme.ts` (especificidade > [class*=ag-theme-]).
+ * Hosts: classe `admin-ssrm-grid-host` em todo grid admin SSRM (produtos, logs, jobs, …) — não depender só de `id`.
  */
-#dbmercado-produtos-grid-host.produtos-grid-host--erp > div[class*='ag-theme-'],
-#dbmercado-logs-grid-host.produtos-grid-host--erp > div[class*='ag-theme-'] {
+.admin-ssrm-grid-host.produtos-grid-host--erp > div[class*='ag-theme-'] {
   --ag-background-color: #141b2d;
   --ag-foreground-color: #ffffff;
   --ag-data-color: var(--ag-foreground-color);
@@ -209,15 +209,13 @@ button {
  * “Valores” fica fora do sítio — sem zoom a zona de arraste não aparece. Fixar altura intrínseca das zonas
  * (grupos + valores) e dar `flex:1` + min-height:0 à lista para ela fazer scroll interno.
  */
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-drop-vertical,
-#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-drop-vertical {
+.admin-ssrm-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-drop-vertical {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   min-height: 76px !important;
 }
 
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select,
-#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select {
+.admin-ssrm-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select {
   flex: 1 1 0% !important;
   min-height: 0 !important;
 }
@@ -370,30 +368,26 @@ button {
 }
 
 /* --------------------------------------------------------------------------
-   Grids admin SSRM (produtos, logs): painel Colunas vs CSS do Enterprise
+   Grids admin SSRM (classe admin-ssrm-grid-host): painel Colunas vs CSS do Enterprise
    O bundle injeta .ag-column-panel-column-select:nth-child(n+2){ border-top: ... }
    (linha entre pivot e pesquisa). Precisa !important + seletor forte; carrega por último.
    -------------------------------------------------------------------------- */
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select.ag-column-panel-column-select,
-#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select.ag-column-panel-column-select {
+.admin-ssrm-grid-host.produtos-grid-host--erp .ag-column-panel .ag-column-select.ag-column-panel-column-select {
   border-top: 0 none transparent !important;
   border-top-width: 0 !important;
   border-bottom: none !important;
   padding-top: calc(var(--ag-grid-size, 7px) * 3) !important;
 }
 
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header,
-#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-select-header {
+.admin-ssrm-grid-host.produtos-grid-host--erp .ag-column-select-header {
   border-bottom: none !important;
   padding-block: 6px 0 !important;
   min-height: unset !important;
   height: auto !important;
 }
 
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-text-field-input,
-#dbmercado-produtos-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-input-field-input,
-#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-text-field-input,
-#dbmercado-logs-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-input-field-input {
+.admin-ssrm-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-text-field-input,
+.admin-ssrm-grid-host.produtos-grid-host--erp .ag-column-select-header-filter-wrapper .ag-input-field-input {
   border-top: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
   border-left: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;
   border-right: 1px solid color-mix(in srgb, var(--ag-border-color, #94a3b8), transparent 45%) !important;

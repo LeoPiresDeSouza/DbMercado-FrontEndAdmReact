@@ -285,7 +285,7 @@ export function JobExecucoesGrid(props: JobExecucoesGridProps): React.ReactEleme
   return (
     <div
       id={JOB_EXEC_GRID_HOST_ID}
-      className="produtos-grid-host produtos-grid-host--erp produtos-grid-host--catalog-scroll w-full min-w-0"
+      className="produtos-grid-host produtos-grid-host--erp admin-ssrm-grid-host produtos-grid-host--catalog-scroll w-full min-w-0"
     >
       <BaseGrid<JobExecucaoGridRow>
         key={`job-exec-grid-${pageSize}`}
