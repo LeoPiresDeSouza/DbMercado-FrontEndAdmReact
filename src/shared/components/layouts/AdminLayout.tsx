@@ -12,6 +12,7 @@ import { readIdentityFromAccessToken } from '../../utils/jwtPayload';
 import AdminSidebar from './AdminSidebar';
 import AdminTopbar from './AdminTopbar';
 import AdminBreadcrumb from './AdminBreadcrumb';
+import { ChatProvider } from '../../../modules/chat/context/ChatContext';
 import './AdminLayout.css';
 
 /**
@@ -105,7 +106,9 @@ function AdminLayout(): React.ReactElement {
         <AdminTopbar />
         <AdminBreadcrumb />
         <main className="admin-content">
-          <Outlet />
+          <ChatProvider>
+            <Outlet />
+          </ChatProvider>
         </main>
       </div>
       <AdminNotificationToasts />

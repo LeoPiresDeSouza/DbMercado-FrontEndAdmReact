@@ -17,6 +17,7 @@ import ProdutoEditarPage from '../../modules/products/pages/ProdutoEditarPage';
 import OrdersPage from '../../modules/orders/pages/OrdersPage';
 import InventoryPage from '../../modules/inventory/pages/InventoryPage';
 import BillingPage from '../../modules/billing/pages/BillingPage';
+import ChatSalasPage from '../../modules/chat/pages/ChatSalasPage';
 import { performClientLogoutCleanup } from '../../shared/auth/clientSessionCleanup';
 import { authService } from '../../modules/auth/services/authService';
 
@@ -96,6 +97,7 @@ export function AppRoutes(): React.ReactElement {
         <Route path="orders" element={<OrdersPage />} />
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="billing" element={<BillingPage />} />
+        <Route path="chat" element={<ChatSalasPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

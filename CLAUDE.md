@@ -353,6 +353,9 @@ ATENÇÃO: headers de seção usam text-orange-400 + border-orange-500/25
 ### Variáveis de ambiente (Frontend)
 ```
 VITE_API_BASE_URL / VITE_DOTNET_API_BASE_URL = http://localhost:5046
+VITE_SIGNALR_HUB_URL = (opcional) URL completa do hub administrativo
+VITE_CHAT_SIGNALR_HUB_URL = (opcional) URL completa do hub de chat; padrão {API}/hubs/chat
+VITE_REALTIME_ENABLED = true|false (hub admin; ver integrações/realtime/config.ts)
 ```
 
 ### appsettings.json (Backend)

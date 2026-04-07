@@ -17,6 +17,21 @@ export function getAdminSignalRHubUrl(): string | null {
 }
 
 /**
+ * Hub SignalR do chat multilíngue (backend: `ChatHub` + JWT `access_token` na query no WebSocket).
+ */
+export function getChatSignalRHubUrl(): string | null {
+  const explicit = import.meta.env.VITE_CHAT_SIGNALR_HUB_URL?.trim();
+  if (explicit) {
+    return explicit;
+  }
+  const base = DOTNET_API_BASE_URL.replace(/\/$/, '');
+  if (!base) {
+    return null;
+  }
+  return `${base}/hubs/chat`;
+}
+
+/**
  * Controle de ativação (evita erros no console enquanto o hub .NET não existir).
  * - `VITE_REALTIME_ENABLED=true` — usa URL explícita ou `{API}/hubs/admin`.
  * - `VITE_SIGNALR_HUB_URL` definida — ativa mesmo sem a flag (útil em dev).

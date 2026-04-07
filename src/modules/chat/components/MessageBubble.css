@@ -1,0 +1,129 @@
+.message-bubble {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.65rem;
+}
+
+.message-bubble--own {
+  justify-content: flex-end;
+}
+
+.message-bubble__shell {
+  max-width: min(92%, 520px);
+  padding: 0.55rem 0.75rem 0.4rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.message-bubble--own .message-bubble__shell {
+  background: rgba(126, 184, 255, 0.12);
+  border-color: rgba(126, 184, 255, 0.22);
+}
+
+.message-bubble__sender {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7eb8ff;
+  margin-bottom: 0.25rem;
+}
+
+.message-bubble__body {
+  min-height: 1.25rem;
+}
+
+.message-bubble__content {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #e8edf5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-bubble__translating {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: #9aa8b8;
+}
+
+.message-bubble__translating-text {
+  font-style: italic;
+}
+
+.message-bubble__dots {
+  display: inline-flex;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.message-bubble__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #7eb8ff;
+  opacity: 0.35;
+  animation: message-bubble-dot-pulse 1.1s ease-in-out infinite;
+}
+
+.message-bubble__dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.message-bubble__dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes message-bubble-dot-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.message-bubble__translation-failed {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #c9a227;
+}
+
+.message-bubble__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.message-bubble--own .message-bubble__meta {
+  justify-content: flex-end;
+}
+
+.message-bubble:not(.message-bubble--own) .message-bubble__meta {
+  justify-content: flex-start;
+}
+
+.message-bubble__read-receipt {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #8b98a8;
+  white-space: nowrap;
+}
+
+.message-bubble__time {
+  margin: 0;
+  font-size: 0.68rem;
+  color: #8b98a8;
+}
+
+.message-bubble--own .message-bubble__time {
+  text-align: right;
+}

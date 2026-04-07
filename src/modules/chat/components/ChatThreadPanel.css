@@ -1,0 +1,125 @@
+.chat-thread-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: min(72vh, 640px);
+  max-height: min(72vh, 640px);
+  background: #141b2d;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.chat-thread-panel--empty {
+  align-items: center;
+  justify-content: center;
+  min-height: min(56vh, 480px);
+  max-height: none;
+}
+
+.chat-thread-panel__placeholder {
+  margin: 0;
+  padding: 2rem 1.5rem;
+  font-size: 0.9rem;
+  color: #8b98a8;
+  text-align: center;
+}
+
+.chat-thread-panel__header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.chat-thread-panel__title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e8edf5;
+}
+
+.chat-thread-panel__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.75rem 1rem 0.5rem;
+}
+
+.chat-thread-panel__empty-thread {
+  margin: 0;
+  padding: 1rem 0;
+  font-size: 0.875rem;
+  color: #8b98a8;
+}
+
+.chat-thread-panel__load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 0.35rem 0 0.75rem;
+}
+
+.chat-thread-panel__history-loading,
+.chat-thread-panel__history-error {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.chat-thread-panel__history-loading {
+  color: #8b98a8;
+}
+
+.chat-thread-panel__history-error {
+  color: #f59b8a;
+}
+
+.chat-thread-panel__typing {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #7eb8ff;
+  animation: chat-thread-typing-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes chat-thread-typing-pulse {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.chat-thread-panel__scroll-anchor {
+  height: 1px;
+  width: 100%;
+}
+
+.chat-thread-panel__composer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 20, 25, 0.35);
+}
+
+.chat-thread-panel__field {
+  margin: 0;
+}
+
+.chat-thread-panel__textarea {
+  min-height: 72px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  resize: vertical;
+  line-height: 1.4;
+}

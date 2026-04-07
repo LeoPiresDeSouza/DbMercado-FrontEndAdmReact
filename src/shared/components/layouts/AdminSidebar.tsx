@@ -10,6 +10,10 @@ import {
   JobExecucoesPermissao,
   usuarioTemPermissaoJobExecucoes,
 } from '../../../modules/jobExecucoes/utils/controleJobExecucoesPermissoes';
+import {
+  ChatMultilinguePermissao,
+  usuarioTemPermissaoChatMultilingue,
+} from '../../../modules/chat/utils/chatPermissoes';
 import { useAppShellStore } from '../../stores/appShellStore';
 import { useModulosUsuarioStore } from '../../stores/modulosUsuarioStore';
 import './AdminSidebar.css';
@@ -29,6 +33,9 @@ function AdminSidebar(): React.ReactElement {
     modulosUsuario !== null && usuarioTemPermissaoControleLogs(modulosUsuario, ControleLogsPermissao.acessar);
   const exibirMenuJobExecucoes =
     modulosUsuario !== null && usuarioTemPermissaoJobExecucoes(modulosUsuario, JobExecucoesPermissao.acessar);
+  const exibirMenuChat =
+    modulosUsuario !== null &&
+    usuarioTemPermissaoChatMultilingue(modulosUsuario, ChatMultilinguePermissao.acessar);
 
   return (
     <aside
@@ -123,6 +130,17 @@ function AdminSidebar(): React.ReactElement {
             onClick={() => setMobileOpen(false)}
           >
             <span className="admin-sidebar__link-text">{t('nav.jobExecucoes')}</span>
+          </NavLink>
+        ) : null}
+        {exibirMenuChat ? (
+          <NavLink
+            to="/admin/chat"
+            className={navClass}
+            title={t('nav.chat')}
+            data-sidebar-glyph="◇"
+            onClick={() => setMobileOpen(false)}
+          >
+            <span className="admin-sidebar__link-text">{t('nav.chat')}</span>
           </NavLink>
         ) : null}
 
